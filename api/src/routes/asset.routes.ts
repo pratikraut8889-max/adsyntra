@@ -46,8 +46,8 @@ import {
 import {
   MetaAdsAssetServiceError,
   listMetaAdsAssets,
-  type MetaAdsProviderAsset,
 } from "../metaadsAPI/services/asset-library.js";
+import type { MetaAdsProviderAsset } from "../metaadsAPI/interfaces/asset-library.js";
 
 const router = Router();
 

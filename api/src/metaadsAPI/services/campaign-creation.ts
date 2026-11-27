@@ -301,38 +301,6 @@ export interface MetaGeoLocations {
 export type MetaExcludedGeoLocations = Omit<MetaGeoLocations, "location_types">;
 
 
-const META_BILLING_EVENTS_BY_GOAL: Record<
-  string,
-  readonly string[]
-> = {
-  LINK_CLICKS: [
-    "LINK_CLICKS",
-    "IMPRESSIONS",
-  ],
-
-  LANDING_PAGE_VIEWS: [
-    "IMPRESSIONS",
-  ],
-
-  APP_INSTALLS: [
-    "APP_INSTALLS",
-    "IMPRESSIONS",
-  ],
-
-  POST_ENGAGEMENT: [
-    "POST_ENGAGEMENT",
-    "IMPRESSIONS",
-  ],
-
-  PAGE_LIKES: [
-    "PAGE_LIKES",
-    "IMPRESSIONS",
-  ],
-
-  DEFAULT: [
-    "IMPRESSIONS",
-  ],
-};
 const META_REQUIRED_DESTINATION_BY_GOAL: Partial<
   Record<string, MetaAdsDestinationType>
 > = {
@@ -375,6 +343,18 @@ export interface MetaAdsCampaignBundleCreationResult {
   creative: MetaAdsAdCreativeCreationResult;
   ad: MetaAdsAdCreationResult;
 }
+
+export type MetaAdsCreatedResourceType = "campaign" | "adSet" | "creative" | "ad";
+
+export interface MetaAdsResourceCheckpoint {
+  resourceType: MetaAdsCreatedResourceType;
+  resourceId: string;
+}
+
+/** Persist each provider resource ID immediately after Meta returns it. */
+export type MetaAdsResourceCheckpointHandler = (
+  checkpoint: MetaAdsResourceCheckpoint,
+) => void | Promise<void>;
 
 
 export interface MetaAdsTargeting {
@@ -871,28 +851,116 @@ function normalizeAdAccountId(value: string): string {
 }
 
 function getMetaApiVersion(): string {
-  // META_GRAPH_API_VERSION is the shared setting returned by MetaOAuthConfig.
-  // Keep the legacy META_ADS_API_VERSION as a fallback, but fail rather than
-  // silently sending Ads requests to a different Graph API version.
-  const graphVersion = process.env.META_GRAPH_API_VERSION?.trim();
-  const adsVersion = process.env.META_ADS_API_VERSION?.trim();
+  const version =
+    process.env.META_GRAPH_API_VERSION?.trim() ||
+    process.env.META_ADS_API_VERSION?.trim() ||
+    "v26.0";
 
-  if (graphVersion && adsVersion && graphVersion !== adsVersion) {
-    throw new MetaAdsCampaignCreationError(
-      "META_GRAPH_API_VERSION and META_ADS_API_VERSION must match when both are configured.",
-      500,
-    );
-  }
-
-  const version = graphVersion || adsVersion || "v26.0";
   if (!/^v\d+\.\d+$/.test(version)) {
     throw new MetaAdsCampaignCreationError(
-      "Invalid Meta Graph API version. Expected a value such as v26.0.",
+      "Invalid META_GRAPH_API_VERSION (or legacy META_ADS_API_VERSION). Expected a version such as v26.0.",
       500,
     );
   }
 
   return version;
+}
+
+export interface MetaAdsBillingCapabilities {
+  apiVersion: string;
+  adAccountId: string;
+  campaignObjective: MetaAdsCampaignObjective;
+  optimizationGoal: string;
+  supportedBillingEvents: string[];
+  /** Meta does not expose a dependable pre-create eligibility list here. */
+  accountEligibility: "META_CHECKS_ON_AD_SET_CREATE";
+}
+
+function resolveMetaAdsBillingCapabilities(input: {
+  apiVersion: string;
+  adAccountId: string;
+  campaignObjective: string;
+  optimizationGoal: string;
+}): MetaAdsBillingCapabilities {
+  const apiVersion = input.apiVersion.trim();
+  const adAccountId = normalizeAdAccountId(input.adAccountId);
+  const campaignObjective = input.campaignObjective
+    .trim()
+    .toUpperCase() as MetaAdsCampaignObjective;
+  const optimizationGoal = input.optimizationGoal.trim().toUpperCase();
+
+  const versionMatrix =
+    META_ADSET_BILLING_CAPABILITIES_BY_API_VERSION[apiVersion];
+
+  if (!versionMatrix) {
+    throw new MetaAdsCampaignCreationError(
+      `No Ad Set billing compatibility matrix is configured for Meta Graph API ${apiVersion}. Live creation is blocked until this version is reviewed.`,
+      400,
+      { apiVersion, campaignObjective, optimizationGoal },
+    );
+  }
+
+  const supportedBillingEvents =
+    versionMatrix[campaignObjective]?.[optimizationGoal] ?? [];
+
+  if (supportedBillingEvents.length === 0) {
+    throw new MetaAdsCampaignCreationError(
+      `The combination ${campaignObjective} / ${optimizationGoal} is not enabled in AdSyntra's Meta Graph API ${apiVersion} billing capability matrix.`,
+      400,
+      {
+        apiVersion,
+        campaignObjective,
+        optimizationGoal,
+        supportedBillingEvents: [],
+      },
+    );
+  }
+
+  return {
+    apiVersion,
+    adAccountId,
+    campaignObjective,
+    optimizationGoal,
+    supportedBillingEvents: [...supportedBillingEvents],
+    accountEligibility: "META_CHECKS_ON_AD_SET_CREATE",
+  };
+}
+
+/**
+ * Returns the server-side billing choices for one active, owner-verified
+ * account selection. Callers must separately verify the account belongs to
+ * the authenticated user before returning these choices to the UI.
+ */
+export function getMetaAdsBillingCapabilities(input: {
+  adAccountId: string;
+  campaignObjective: string;
+  optimizationGoal: string;
+}): MetaAdsBillingCapabilities {
+  return resolveMetaAdsBillingCapabilities({
+    apiVersion: getMetaApiVersion(),
+    ...input,
+  });
+}
+
+function assertMetaAdsBillingSelection(input: {
+  apiVersion: string;
+  adAccountId: string;
+  campaignObjective: string;
+  optimizationGoal: string;
+  billingEvent: string;
+}): MetaAdsBillingCapabilities {
+  const capabilities = resolveMetaAdsBillingCapabilities(input);
+  const billingEvent = input.billingEvent.trim().toUpperCase();
+
+  if (!capabilities.supportedBillingEvents.includes(billingEvent)) {
+    throw new MetaAdsCampaignCreationError(
+      `Billing event ${billingEvent} is not supported for ${capabilities.campaignObjective} / ${capabilities.optimizationGoal} on Meta Graph API ${capabilities.apiVersion}. Choose one of: ${capabilities.supportedBillingEvents.join(", ")}.`,
+      400,
+      capabilities,
+    );
+  }
+
+  return capabilities;
 }
 
 function validateCreateCampaignInput(
@@ -1223,9 +1291,19 @@ function getMetaErrorMessage(body: unknown, status: number): string {
   if (body && typeof body === "object" && "error" in body) {
     const error = (body as MetaApiErrorBody).error;
     if (error?.message) {
-      const code = error.code === undefined ? "" : ` (code ${error.code})`;
+      const code = error.code === undefined ? "" : ` (code ${error.code}`;
+      const subcode = error.error_subcode === undefined
+        ? ""
+        : `${error.code === undefined ? " (" : ", "}subcode ${error.error_subcode}`;
+      const codeSuffix = code || subcode
+        ? `${code}${subcode})`
+        : "";
       const type = error.type ? ` ${error.type}` : "";
-      return `Meta Ads API request failed with HTTP ${status}${type}${code}: ${error.message}`;
+      const trace = error.fbtrace_id ? ` Meta trace: ${error.fbtrace_id}.` : "";
+      const billingHint = error.error_subcode === 2446404
+        ? " Meta reports that this ad account is not currently eligible for the requested billing option. Select a different billing event only from the server-returned options for this objective and API version, or review the ad account's billing settings and Meta Support Inbox."
+        : "";
+      return `Meta Ads API request failed with HTTP ${status}${type}${codeSuffix}: ${error.message}.${billingHint}${trace}`;
     }
   }
 
@@ -1901,6 +1979,60 @@ export type MetaAdsCampaignObjective =
   | "OUTCOME_SALES"
   | "OUTCOME_APP_PROMOTION";
 
+/**
+ * AdSyntra's supported objective / optimization-goal / billing-event matrix.
+ * This is intentionally pinned to the configured Graph API version. It is a
+ * product compatibility allowlist, not a promise that every ad account is
+ * eligible for every listed billing option. Meta performs the final
+ * account-specific eligibility check when the Ad Set is created.
+ *
+ * Keep this matrix versioned. Do not copy entries from a newer Graph API
+ * version into v26.0 without reviewing that version's compatibility.
+ */
+const META_ADSET_BILLING_CAPABILITIES_BY_API_VERSION: Readonly<
+  Record<
+    string,
+    Partial<
+      Record<
+        MetaAdsCampaignObjective,
+        Readonly<Record<string, readonly string[]>>
+      >
+    >
+  >
+> = {
+  "v26.0": {
+    OUTCOME_AWARENESS: {
+      REACH: ["IMPRESSIONS"],
+      IMPRESSIONS: ["IMPRESSIONS"],
+      AD_RECALL_LIFT: ["IMPRESSIONS"],
+    },
+    OUTCOME_TRAFFIC: {
+      LINK_CLICKS: ["LINK_CLICKS", "IMPRESSIONS"],
+      LANDING_PAGE_VIEWS: ["IMPRESSIONS"],
+    },
+    OUTCOME_ENGAGEMENT: {
+      POST_ENGAGEMENT: ["POST_ENGAGEMENT", "IMPRESSIONS"],
+      PAGE_LIKES: ["PAGE_LIKES", "IMPRESSIONS"],
+      CONVERSATIONS: ["IMPRESSIONS"],
+    },
+    OUTCOME_LEADS: {
+      LEAD_GENERATION: ["IMPRESSIONS"],
+      OFFSITE_CONVERSIONS: ["IMPRESSIONS"],
+    },
+    OUTCOME_SALES: {
+      OFFSITE_CONVERSIONS: ["IMPRESSIONS"],
+      VALUE: ["IMPRESSIONS"],
+      // AdSyntra separately restricts this objective/goal to the supported
+      // Website Catalog workflow with Product Set + PURCHASE event.
+      LINK_CLICKS: ["LINK_CLICKS", "IMPRESSIONS"],
+    },
+    OUTCOME_APP_PROMOTION: {
+      APP_INSTALLS: ["APP_INSTALLS", "IMPRESSIONS"],
+      OFFSITE_CONVERSIONS: ["IMPRESSIONS"],
+    },
+  },
+};
+
 export type MetaAdsDestinationType =
   | "WEBSITE"
   | "ON_AD"
@@ -1961,6 +2093,8 @@ export interface MetaAdsAttributionSpec {
 
 
 interface MetaObjectiveValidationInput {
+  apiVersion: string;
+  adAccountId: string;
   campaignObjective: MetaAdsCampaignObjective;
   optimizationGoal: string;
   billingEvent: string;
@@ -2004,17 +2138,15 @@ function validateMetaObjectiveCompatibility(
     );
   }
 
-  // 3. Validate billing event
-  const allowedBillingEvents: any =
-    META_BILLING_EVENTS_BY_GOAL[goal] ??
-    META_BILLING_EVENTS_BY_GOAL[`DEFAULT`];
-
-  if (!allowedBillingEvents.includes(billingEvent)) {
-    throw new MetaAdsCampaignCreationError(
-      `Billing event ${billingEvent} is not supported for optimization goal ${goal}.`,
-      400,
-    );
-  }
+  // 3. Validate the objective / optimization / billing tuple against the
+  // exact Graph API version and the currently selected ad account.
+  assertMetaAdsBillingSelection({
+    apiVersion: input.apiVersion,
+    adAccountId: input.adAccountId,
+    campaignObjective: objective,
+    optimizationGoal: goal,
+    billingEvent,
+  });
 
   // 4. Resolve destination
   let expectedDestination =
@@ -2234,6 +2366,8 @@ export async function createMetaAdsAdSet(
 
   const objectiveValidation =
     validateMetaObjectiveCompatibility({
+      apiVersion: context.apiVersion,
+      adAccountId: context.adAccountId,
       campaignObjective: input.campaignObjective,
       optimizationGoal,
       billingEvent,
@@ -3489,6 +3623,10 @@ export async function createMetaAdsCampaign(
     special_ad_categories: JSON.stringify(validated.specialAdCategories),
   });
 
+  if (validated.metaValidateOnly) {
+    form.set("execution_options", JSON.stringify(["validate_only"]));
+  }
+
   if (validated.specialAdCategoryCountries.length > 0) {
     form.set(
       "special_ad_category_country",
@@ -3540,10 +3678,6 @@ export async function createMetaAdsCampaign(
     );
   }
 
-  if (validated.metaValidateOnly) {
-    form.set("execution_options", JSON.stringify(["validate_only"]));
-  }
-
   let response: Response;
   let responseBody: unknown;
 
@@ -3577,7 +3711,8 @@ export async function createMetaAdsCampaign(
     );
   }
 
-  // Meta's validate_only response is success:true and intentionally has no ID.
+  // Meta's native validate_only response is success:true and intentionally
+  // contains no Campaign ID because no external resource is created.
   if (validated.metaValidateOnly) {
     if (
       !responseBody ||
@@ -3662,19 +3797,42 @@ export async function createMetaAdsCampaignForUser(
   userId: string,
   selectedAccountId: string,
   input: CreateMetaAdsCampaignBundleInput,
+  onResourceCreated?: MetaAdsResourceCheckpointHandler,
 ): Promise<MetaAdsCampaignBundleCreationResult> {
-  const context = await getMetaAdsCreationContext(
-    userId,
-    selectedAccountId,
-  );
-console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
+  const validateOnly = input.campaign.validateOnly ?? true;
+  const confirm = input.campaign.confirm;
+  const creativeFormat = String(input.creative.format ?? "").trim().toUpperCase();
+  const isCatalogDynamicProductAd = creativeFormat === "CATALOG_TEMPLATE";
+
+  // The service layer is a second safety boundary. During this test phase,
+  // live Meta mutations are restricted to the explicitly enabled Catalog DPA
+  // workflow. Validation-only requests remain available without this flag.
+  if (!validateOnly) {
+    if (!isCatalogDynamicProductAd) {
+      throw new MetaAdsCampaignCreationError(
+        "Live Meta Ads creation is currently restricted to Meta Catalog Dynamic Product Ads.",
+        403,
+      );
+    }
+    if (process.env.META_CATALOG_LIVE_CREATION_ENABLED?.trim().toLowerCase() !== "true") {
+      throw new MetaAdsCampaignCreationError(
+        "Live Meta Catalog creation is disabled on the API server. Set META_CATALOG_LIVE_CREATION_ENABLED=true to explicitly enable controlled testing.",
+        403,
+      );
+    }
+    if (confirm !== true) {
+      throw new MetaAdsCampaignCreationError(
+        "Live Meta Catalog creation requires confirm:true.",
+        400,
+      );
+    }
+  }
+
+  console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
     userId,
     selectedAccountId,
     input,
   });
-
-  const validateOnly = input.campaign.validateOnly ?? true;
-  const confirm = input.campaign.confirm;
 
   const budgetLevel = input.campaign.budgetLevel ?? "CAMPAIGN";
 
@@ -3705,7 +3863,6 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
     if (
       input.campaign.objective !== "OUTCOME_SALES" ||
       input.adSet.optimization_goal.trim().toUpperCase() !== "LINK_CLICKS" ||
-      input.adSet.billing_event.trim().toUpperCase() !== "LINK_CLICKS" ||
       input.adSet.destinationType !== "WEBSITE" ||
       input.creative.destinationType !== "WEBSITE" ||
       !campaignCatalogId || !/^\d+$/.test(campaignCatalogId) ||
@@ -3716,7 +3873,7 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
       input.adSet.placements?.mode !== "AUTOMATIC"
     ) {
       throw new MetaAdsCampaignCreationError(
-        "Catalog Dynamic Product Ads require matching Campaign Catalog and Ad Set/Creative Product Set IDs, OUTCOME_SALES, Link Clicks optimization and billing, Website destination, PURCHASE custom event, Automatic placements and Shop Now CTA.",
+        "Catalog Dynamic Product Ads require matching Campaign Catalog and Ad Set/Creative Product Set IDs, OUTCOME_SALES, Link Clicks optimization, a v26.0-compatible billing event, Website destination, PURCHASE custom event, Automatic placements and Shop Now CTA.",
         400,
       );
     }
@@ -3776,6 +3933,12 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
     }
   }
 
+  // Resolve credentials only after local configuration and live-mode guards pass.
+  const context = await getMetaAdsCreationContext(
+    userId,
+    selectedAccountId,
+  );
+
   const adSetInput = {
     ...input.adSet,
     campaignObjective: input.campaign.objective,
@@ -3800,7 +3963,6 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
       {
         ...input.campaign,
         validateOnly: true,
-        metaValidateOnly: input.campaign.metaValidateOnly === true,
       },
     );
 
@@ -3876,6 +4038,11 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
       );
     }
 
+    await onResourceCreated?.({
+      resourceType: "campaign",
+      resourceId: campaignResult.campaignId,
+    });
+
     // 2. Ad Set
     failedStep = "Ad Set";
 
@@ -3898,6 +4065,11 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
       );
     }
 
+    await onResourceCreated?.({
+      resourceType: "adSet",
+      resourceId: adSetResult.adSetId,
+    });
+
     // 3. Creative
     failedStep = "Creative";
 
@@ -3919,6 +4091,11 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
       );
     }
 
+    await onResourceCreated?.({
+      resourceType: "creative",
+      resourceId: creativeResult.creativeId,
+    });
+
     // 4. Ad
     failedStep = "Ad";
 
@@ -3934,6 +4111,13 @@ console.info("[META ADS CAMPAIGN BUNDLE INPUT]", {
     );
 
     partialResult.ad = adResult;
+
+    if (adResult.adId) {
+      await onResourceCreated?.({
+        resourceType: "ad",
+        resourceId: adResult.adId,
+      });
+    }
 
     return {
       validateOnly: false,
@@ -4022,6 +4206,7 @@ export async function resumeMetaAdsCampaignForUser(
   selectedAccountId: string,
   input: CreateMetaAdsCampaignBundleInput,
   options: ResumeMetaAdsCampaignOptions,
+  onResourceCreated?: MetaAdsResourceCheckpointHandler,
 ): Promise<MetaAdsCampaignResumeResult> {
   const campaignId = options.campaignId?.trim();
 
@@ -4146,6 +4331,12 @@ export async function resumeMetaAdsCampaignForUser(
     }
 
     partialResult.adSet = adSetResult;
+    if (!existingAdSetId && adSetResult.adSetId) {
+      await onResourceCreated?.({
+        resourceType: "adSet",
+        resourceId: adSetResult.adSetId,
+      });
+    }
 
     let creativeResult: MetaAdsAdCreativeCreationResult;
     failedStep = "Creative";
@@ -4177,6 +4368,12 @@ export async function resumeMetaAdsCampaignForUser(
     }
 
     partialResult.creative = creativeResult;
+    if (!existingCreativeId && creativeResult.creativeId) {
+      await onResourceCreated?.({
+        resourceType: "creative",
+        resourceId: creativeResult.creativeId,
+      });
+    }
 
     let adResult: MetaAdsAdCreationResult;
     failedStep = "Ad";
@@ -4212,6 +4409,12 @@ export async function resumeMetaAdsCampaignForUser(
     }
 
     partialResult.ad = adResult;
+    if (!existingAdId && adResult.adId) {
+      await onResourceCreated?.({
+        resourceType: "ad",
+        resourceId: adResult.adId,
+      });
+    }
 
     return {
       validateOnly: false,
@@ -4252,6 +4455,4 @@ export async function resumeMetaAdsCampaignForUser(
     );
   }
 }
-
-
 

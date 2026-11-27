@@ -1,23 +1,10 @@
 import { getProviderAccessToken } from "../../utils/provider-token.utils.js";
-
-export type MetaWebsiteAudienceEvent = "PageView" | "ViewContent" | "AddToCart" | "Purchase";
-
-export interface CreateMetaWebsiteCustomAudienceInput {
-    name: string;
-    description?: string;
-    pixelId: string;
-    retentionDays: number;
-    eventName: MetaWebsiteAudienceEvent;
-}
-
-export interface MetaAudienceCreateResult {
-    provider: "metaAds";
-    id: string;
-    name: string;
-    subtype: "WEBSITE";
-    pixelId: string;
-    retentionDays: number;
-}
+import type {
+    CreateMetaWebsiteCustomAudienceInput,
+    MetaAudienceCreateResult,
+    MetaWebsiteAudienceEvent,
+} from "../interfaces/audience-creation.service.js";
+import { normalizeMetaAdAccountId } from "../utils/common.js";
 
 export class MetaAudienceCreationError extends Error {
     constructor(
@@ -33,11 +20,11 @@ export class MetaAudienceCreationError extends Error {
 const ALLOWED_EVENTS: MetaWebsiteAudienceEvent[] = ["PageView", "ViewContent", "AddToCart", "Purchase"];
 
 function normalizeAccountId(value: string): string {
-    const id = value.trim().replace(/^act_/, "");
-    if (!/^\d+$/.test(id)) {
+    try {
+        return normalizeMetaAdAccountId(value);
+    } catch {
         throw new MetaAudienceCreationError("Invalid Meta ad account ID.", 400);
     }
-    return `act_${id}`;
 }
 
 function readName(value: unknown): string {

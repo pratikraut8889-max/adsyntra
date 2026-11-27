@@ -40,9 +40,11 @@ import {
 } from "../googleadsAPI/services/campaign-creation.js";
 import {
     createMetaAdsCampaignForUser,
+    resumeMetaAdsCampaignForUser,
     createMetaAdsAdSet,
     createMetaAdsAdCreative,
     getMetaAdsCreationContext,
+    getMetaAdsBillingCapabilities,
     MetaAdsCampaignCreationError,
     type CreateMetaAdsCampaignBundleInput,
     type CreateMetaAdsAdCreativeInput,
@@ -168,6 +170,88 @@ function isRecord(
         value !== null &&
         !Array.isArray(value)
     );
+}
+
+function isMetaCatalogDynamicProductAdsConfiguration(configuration: unknown): boolean {
+    if (!isRecord(configuration)) return false;
+    const ad = isRecord(configuration.ad) ? configuration.ad : {};
+    const creative = isRecord(configuration.creative)
+        ? configuration.creative
+        : isRecord(ad.creativeDraft)
+            ? ad.creativeDraft
+            : {};
+    const catalog = isRecord(configuration.catalog) ? configuration.catalog : {};
+    const format = String(creative.format ?? creative.creativeFormat ?? "").trim().toUpperCase();
+    return format === "CATALOG_TEMPLATE" && catalog.enabled === true;
+}
+
+function getMetaCatalogLiveCreationBlockReason(configuration: unknown): string | null {
+    if (!isMetaCatalogDynamicProductAdsConfiguration(configuration)) {
+        return "Live Meta Ads creation is currently restricted to Meta Catalog Dynamic Product Ads.";
+    }
+    if (process.env.META_CATALOG_LIVE_CREATION_ENABLED?.trim().toLowerCase() !== "true") {
+        return "Live Meta Catalog creation is disabled on the API server. Set META_CATALOG_LIVE_CREATION_ENABLED=true to explicitly enable controlled testing.";
+    }
+    return null;
+}
+
+type MetaCampaignResourceType = "campaign" | "adSet" | "creative" | "ad";
+
+function normalizeMetaCampaignResourceType(value: unknown): string {
+    return String(value ?? "").toLowerCase().replace(/[_-]/g, "");
+}
+
+function upsertMetaCampaignResource(
+    metaProvider: any,
+    resourceType: MetaCampaignResourceType,
+    resourceId: string,
+): void {
+    const resources: any[] = Array.isArray(metaProvider.resources)
+        ? [...metaProvider.resources]
+        : [];
+    const normalizedType = normalizeMetaCampaignResourceType(resourceType);
+    const existingIndex = resources.findIndex((resource) =>
+        isRecord(resource) &&
+        normalizeMetaCampaignResourceType(resource.resourceType) === normalizedType,
+    );
+
+    const savedResource = {
+        resourceType,
+        resourceId,
+        status: "created",
+        deliveryStatus: "PAUSED",
+    };
+
+    if (existingIndex >= 0) {
+        resources[existingIndex] = savedResource;
+    } else {
+        resources.push(savedResource);
+    }
+
+    metaProvider.resources = resources;
+
+    if (resourceType === "campaign") {
+        metaProvider.providerCampaignId = resourceId;
+        metaProvider.providerStatus = "PAUSED";
+    }
+    metaProvider.deliveryStatus = "PAUSED";
+}
+
+function getMetaCampaignResourceId(
+    resources: unknown,
+    acceptedType: MetaCampaignResourceType,
+): string | null {
+    if (!Array.isArray(resources)) return null;
+    const normalizedType = normalizeMetaCampaignResourceType(acceptedType);
+    const item = resources.find((resource) =>
+        isRecord(resource) &&
+        normalizeMetaCampaignResourceType(resource.resourceType) === normalizedType,
+    );
+    if (!isRecord(item)) return null;
+    const id = item.resourceId ?? item.id;
+    return typeof id === "string" && /^\d+$/.test(id.trim())
+        ? id.trim()
+        : null;
 }
 
 async function readOwnedCampaignImageAsset(
@@ -1479,6 +1563,7 @@ function buildMetaCampaignBundleInput(
     websiteUrl: string | null,
     providerObjective: string,
     configuration: any,
+    selectedMetaAdAccountId: string,
     execution: {
         validateOnly: boolean;
         confirm: boolean;
@@ -1615,8 +1700,18 @@ function buildMetaCampaignBundleInput(
         const adSetProductSetId = optionalConfigString(adSetPromoted, ["product_set_id", "productSetId"], "Meta Ad Set Product Set ID");
         const adSetEvent = optionalConfigString(adSetPromoted, ["custom_event_type", "customEventType"], "Meta Catalog custom event");
         const creativeProductSetId = optionalConfigString(creativeConfig, ["productSetId", "product_set_id"], "Meta Creative Product Set ID");
-        if (normalizedObjective !== "OUTCOME_SALES" || optimizationGoal !== "LINK_CLICKS" || billingEvent !== "LINK_CLICKS") {
-            throw new CampaignRequestValidationError("Meta Catalog Dynamic Product Ads require OUTCOME_SALES, LINK_CLICKS optimization and LINK_CLICKS billing.");
+        if (normalizedObjective !== "OUTCOME_SALES" || optimizationGoal !== "LINK_CLICKS") {
+            throw new CampaignRequestValidationError("Meta Catalog Dynamic Product Ads require OUTCOME_SALES and LINK_CLICKS optimization.");
+        }
+        const catalogBillingCapabilities = getMetaAdsBillingCapabilities({
+            adAccountId: selectedMetaAdAccountId,
+            campaignObjective: normalizedObjective,
+            optimizationGoal,
+        });
+        if (!catalogBillingCapabilities.supportedBillingEvents.includes(billingEvent)) {
+            throw new CampaignRequestValidationError(
+                `Billing event ${billingEvent} is not supported for ${normalizedObjective} / ${optimizationGoal} on ${catalogBillingCapabilities.apiVersion}. Choose one of: ${catalogBillingCapabilities.supportedBillingEvents.join(", ")}.`,
+            );
         }
         if (creativeDestinationType !== "WEBSITE" || placementMode !== "AUTOMATIC") {
             throw new CampaignRequestValidationError("The initial Meta Catalog Dynamic Product Ad workflow requires Website destination and Automatic placements.");
@@ -3952,17 +4047,6 @@ router.post("/", async (req: Request, res: Response) => {
                     );
                 }
 
-                const metaCreateGate = evaluateCampaignCreateGate(
-                    "metaAds",
-                    metaRequest.providerCampaignType,
-                    execution.validateOnly,
-                );
-                if (!metaCreateGate.allowed) {
-                    throw new CampaignRequestValidationError(
-                        metaCreateGate.reason ?? "Meta Ads campaign creation is not enabled for this campaign type.",
-                    );
-                }
-
                 const preliminaryMetaConfiguration = isRecord(metaRequest.configuration)
                     ? metaRequest.configuration
                     : {};
@@ -3979,6 +4063,32 @@ router.post("/", async (req: Request, res: Response) => {
                     : {};
                 const preliminaryCreativeFormat = String(getConfigValue(preliminaryMetaCreative, "format", "creativeFormat") ?? "").trim().toUpperCase();
                 const isPreliminaryMetaCatalogCreative = preliminaryCreativeFormat === "CATALOG_TEMPLATE" && preliminaryMetaCatalog.enabled === true;
+
+                if (!execution.validateOnly) {
+                    const liveBlockReason = getMetaCatalogLiveCreationBlockReason(metaRequest.configuration);
+                    if (liveBlockReason) {
+                        throw new CampaignRequestValidationError(liveBlockReason);
+                    }
+                    if (execution.confirm !== true) {
+                        throw new CampaignRequestValidationError("Live Meta Catalog creation requires execution.confirm:true.");
+                    }
+                }
+
+                const metaCreateGate = evaluateCampaignCreateGate(
+                    "metaAds",
+                    metaRequest.providerCampaignType,
+                    execution.validateOnly,
+                );
+                const optedInCatalogLiveCreation =
+                    !execution.validateOnly &&
+                    isPreliminaryMetaCatalogCreative &&
+                    process.env.META_CATALOG_LIVE_CREATION_ENABLED?.trim().toLowerCase() === "true";
+                if (!metaCreateGate.allowed && !optedInCatalogLiveCreation) {
+                    throw new CampaignRequestValidationError(
+                        metaCreateGate.reason ?? "Meta Ads campaign creation is not enabled for this campaign type.",
+                    );
+                }
+
                 const metaCapabilityConfigurationError = isPreliminaryMetaCatalogCreative
                     ? null
                     : getCapabilityConfigurationError(
@@ -4170,8 +4280,18 @@ router.post("/", async (req: Request, res: Response) => {
                     const placementsValue = getConfigValue(adSetConfiguration, "placements");
                     const placements = isRecord(placementsValue) ? placementsValue : {};
                     const placementMode = String(getConfigValue(placements, "mode") ?? "").trim().toUpperCase();
-                    if (objective !== "OUTCOME_SALES" || buyingType !== "AUCTION" || optimizationGoal !== "LINK_CLICKS" || billingEvent !== "LINK_CLICKS" || placementMode !== "AUTOMATIC") {
-                        throw new CampaignRequestValidationError("Meta Catalog Dynamic Product Ads require OUTCOME_SALES, AUCTION buying, LINK_CLICKS optimization and billing, and Automatic placements.");
+                    if (objective !== "OUTCOME_SALES" || buyingType !== "AUCTION" || optimizationGoal !== "LINK_CLICKS" || placementMode !== "AUTOMATIC") {
+                        throw new CampaignRequestValidationError("Meta Catalog Dynamic Product Ads require OUTCOME_SALES, AUCTION buying, LINK_CLICKS optimization and Automatic placements.");
+                    }
+                    const catalogBillingCapabilities = getMetaAdsBillingCapabilities({
+                        adAccountId: metaRequest.accountId,
+                        campaignObjective: objective,
+                        optimizationGoal,
+                    });
+                    if (!catalogBillingCapabilities.supportedBillingEvents.includes(billingEvent)) {
+                        throw new CampaignRequestValidationError(
+                            `Billing event ${billingEvent} is not supported for ${objective} / ${optimizationGoal} on ${catalogBillingCapabilities.apiVersion}. Choose one of: ${catalogBillingCapabilities.supportedBillingEvents.join(", ")}.`,
+                        );
                     }
 
                     const catalogIdValue = getConfigValue(requestedCatalogConfig, "catalogId", "catalog_id");
@@ -4481,6 +4601,7 @@ router.post("/", async (req: Request, res: Response) => {
                     request.websiteUrl,
                     metaRequest.providerObjective,
                     metaRequest.configuration,
+                    metaRequest.accountId,
                     execution,
                     uploadedMetaImageHash,
                     uploadedMetaVideo,
@@ -4489,11 +4610,38 @@ router.post("/", async (req: Request, res: Response) => {
                     resolvedMetaCatalogDestination,
                 );
 
-                // 3. Execute all four Meta creation stages.
+                // Claim this provider execution before the first live Meta mutation.
+                // The in-progress value remains set throughout the sequential bundle,
+                // so retry endpoints cannot race the initial creation request.
+                if (!execution.validateOnly) {
+                    metaProvider.creationStatus = "meta_creation_in_progress";
+                    metaProvider.lastError = null;
+                    metaProvider.deliveryStatus = "PAUSED";
+                    metaProvider.lastSyncedAt = new Date();
+                    campaign.markModified("providers.metaAds");
+                    await campaign.save();
+                }
+
+                // 3. Execute the Campaign -> Ad Set -> Creative -> Ad sequence.
+                // Persist every returned Meta ID immediately, not only after the
+                // entire four-object bundle has completed.
                 const result = await createMetaAdsCampaignForUser(
                     userId,
                     metaRequest.accountId,
                     metaBundleInput,
+                    async (checkpoint) => {
+                        upsertMetaCampaignResource(
+                            metaProvider,
+                            checkpoint.resourceType,
+                            checkpoint.resourceId,
+                        );
+                        // Do not release the in-progress lock between provider stages.
+                        metaProvider.creationStatus = "meta_creation_in_progress";
+                        metaProvider.lastError = null;
+                        metaProvider.lastSyncedAt = new Date();
+                        campaign.markModified("providers.metaAds");
+                        await campaign.save();
+                    },
                 );
 
                 // 4. Update the MongoDB provider record.
@@ -4516,26 +4664,18 @@ router.post("/", async (req: Request, res: Response) => {
                     metaProvider.resources = [];
                     metaProvider.lastSyncedAt = null;
                 } else {
-                    metaProvider.resources = [
-                        {
-                            resourceType: "campaign",
-                            resourceId: result.campaign.campaignId,
-                        },
-                        {
-                            resourceType: "adSet",
-                            resourceId: result.adSet.adSetId,
-                        },
-                        {
-                            resourceType: "creative",
-                            resourceId: result.creative.creativeId,
-                        },
-                        {
-                            resourceType: "ad",
-                            resourceId: result.ad.adId,
-                        },
-                    ].filter(
-                        (resource) => Boolean(resource.resourceId),
-                    );
+                    if (result.campaign.campaignId) {
+                        upsertMetaCampaignResource(metaProvider, "campaign", result.campaign.campaignId);
+                    }
+                    if (result.adSet.adSetId) {
+                        upsertMetaCampaignResource(metaProvider, "adSet", result.adSet.adSetId);
+                    }
+                    if (result.creative.creativeId) {
+                        upsertMetaCampaignResource(metaProvider, "creative", result.creative.creativeId);
+                    }
+                    if (result.ad.adId) {
+                        upsertMetaCampaignResource(metaProvider, "ad", result.ad.adId);
+                    }
 
                     metaProvider.lastSyncedAt = new Date();
                 }
@@ -4570,6 +4710,16 @@ router.post("/", async (req: Request, res: Response) => {
 
                 const providerErrorDetails =
                     errorDetails.originalErrorDetails ?? null;
+
+                const providerMetaError =
+                    isRecord(providerErrorDetails) && isRecord(providerErrorDetails.error)
+                        ? providerErrorDetails.error
+                        : {};
+                const metaErrorSubcode =
+                    typeof providerMetaError.error_subcode === "number"
+                        ? providerMetaError.error_subcode
+                        : null;
+                const isMetaBillingOptionUnavailable = metaErrorSubcode === 2446404;
 
                 const providerStatusCode =
                     error instanceof MetaCampaignPrerequisiteError
@@ -4631,18 +4781,26 @@ router.post("/", async (req: Request, res: Response) => {
                     },
                 ].filter((resource) => Boolean(resource.resourceId));
 
-                if (metaProvider) {
-                    metaProvider.creationStatus =
-                        partialResources.length > 0 ? "partial" : "failed";
+                const ambiguousMetaOutcome =
+                    !(error instanceof MetaAdsCampaignCreationError) ||
+                    error.statusCode >= 500;
+                const metaFailureStatus = ambiguousMetaOutcome
+                    ? "needs_attention"
+                    : partialResources.length > 0
+                        ? "partial"
+                        : "failed";
 
-                    metaProvider.providerCampaignId = campaignId;
-                    metaProvider.providerStatus = campaignId ? "PAUSED" : null;
+                if (metaProvider) {
+                    metaProvider.creationStatus = metaFailureStatus;
+
+                    metaProvider.providerCampaignId = campaignId ?? metaProvider.providerCampaignId ?? null;
+                    metaProvider.providerStatus = metaProvider.providerCampaignId ? "PAUSED" : null;
                     metaProvider.deliveryStatus = "PAUSED";
                     metaProvider.resources = partialResources;
                     metaProvider.lastError = message;
 
                     metaProvider.lastSyncedAt =
-                        partialResources.length > 0 ? new Date() : null;
+                        partialResources.length > 0 || ambiguousMetaOutcome ? new Date() : null;
 
                     campaign.markModified("providers.metaAds");
                     await campaign.save();
@@ -4651,8 +4809,7 @@ router.post("/", async (req: Request, res: Response) => {
                 providerResults.metaAds = {
                     success: false,
                     accountId: metaRequest?.accountId ?? null,
-                    creationStatus:
-                        partialResources.length > 0 ? "partial" : "failed",
+                    creationStatus: metaFailureStatus,
                     failedStep:
                         error instanceof MetaCampaignPrerequisiteError
                             ? "PREREQUISITE_VALIDATION"
@@ -4661,7 +4818,13 @@ router.post("/", async (req: Request, res: Response) => {
                                 : null,
                     errorCode: error instanceof MetaCampaignPrerequisiteError
                         ? "META_CAMPAIGN_PREREQUISITE_FAILED"
-                        : null,
+                        : isMetaBillingOptionUnavailable
+                            ? "META_BILLING_OPTION_NOT_AVAILABLE"
+                            : null,
+                    accountBillingEligibility: isMetaBillingOptionUnavailable
+                        ? "REJECTED_BY_META_FOR_SELECTED_BILLING_EVENT"
+                        : "NOT_PRECHECKED",
+                    metaErrorSubcode,
                     error: message,
                     partialResources,
                     providerStatusCode,
@@ -4816,24 +4979,20 @@ router.post(
                 });
             }
 
-            // This retry currently permits only the billing-event correction
-            // needed by the LINK_CLICKS Traffic test.
+            // Accept an explicit candidate here; the shared server-side
+            // capability matrix validates it after the saved objective and
+            // optimization goal have been loaded.
             const billingEventOverride =
                 body.billing_event === undefined
                     ? undefined
-                    : typeof body.billing_event === "string"
+                    : typeof body.billing_event === "string" && body.billing_event.trim().length > 0
                         ? body.billing_event.trim().toUpperCase()
                         : null;
 
-            if (
-                billingEventOverride === null ||
-                (billingEventOverride !== undefined &&
-                    billingEventOverride !== "IMPRESSIONS")
-            ) {
+            if (billingEventOverride === null) {
                 return res.status(400).json({
                     success: false,
-                    message:
-                        "billing_event override must be IMPRESSIONS.",
+                    message: "billing_event override must be a non-empty string.",
                 });
             }
 
@@ -4864,6 +5023,11 @@ router.post(
                     success: false,
                     message: "Meta provider configuration is missing.",
                 });
+            }
+
+            const liveCreationBlockReason = getMetaCatalogLiveCreationBlockReason(metaProvider.configuration);
+            if (liveCreationBlockReason) {
+                return res.status(403).json({ success: false, message: liveCreationBlockReason });
             }
 
             // The original Campaign must already exist remotely.
@@ -5041,16 +5205,41 @@ router.post(
                 });
             }
 
-            // For this LINK_CLICKS Traffic test, use Meta's
-            // documented IMPRESSIONS billing event.
-            if (
-                optimizationGoal === "LINK_CLICKS" &&
-                effectiveBillingEvent !== "IMPRESSIONS"
-            ) {
-                return res.status(400).json({
+            // Validate the complete objective / optimization / billing pair
+            // against this server's configured Meta Graph API version.
+            const billingCapabilities = getMetaAdsBillingCapabilities({
+                adAccountId: metaProvider.accountId,
+                campaignObjective,
+                optimizationGoal,
+            });
+
+            if (!billingCapabilities.supportedBillingEvents.includes(effectiveBillingEvent)) {
+                return res.status(422).json({
                     success: false,
-                    message:
-                        "For this LINK_CLICKS Traffic retry, send billing_event: IMPRESSIONS.",
+                    errorCode: "META_BILLING_COMBINATION_UNSUPPORTED",
+                    message: `Billing event ${effectiveBillingEvent} is not supported for ${campaignObjective} / ${optimizationGoal} on ${billingCapabilities.apiVersion}.`,
+                    apiVersion: billingCapabilities.apiVersion,
+                    availableBillingEvents: billingCapabilities.supportedBillingEvents,
+                });
+            }
+
+            const previousBillingEventWasRejected =
+                String(metaProvider.lastError ?? "").includes("2446404");
+
+            if (
+                previousBillingEventWasRejected &&
+                (!billingEventOverride || effectiveBillingEvent === storedBillingEvent)
+            ) {
+                return res.status(409).json({
+                    success: false,
+                    errorCode: "META_BILLING_OPTION_NOT_AVAILABLE",
+                    message: "Meta rejected the previous billing event for this ad account. Select a different event from the supported options below; AdSyntra will not change it automatically.",
+                    apiVersion: billingCapabilities.apiVersion,
+                    rejectedBillingEvent: storedBillingEvent,
+                    availableBillingEvents: billingCapabilities.supportedBillingEvents.filter(
+                        (event) => event !== storedBillingEvent,
+                    ),
+                    accountEligibility: "META_CHECKS_ON_AD_SET_CREATE",
                 });
             }
 
@@ -5162,6 +5351,14 @@ router.post(
                     error instanceof MetaAdsCampaignCreationError
                         ? error.details ?? null
                         : null;
+                const retryMetaError =
+                    isRecord(providerErrorDetails) && isRecord(providerErrorDetails.error)
+                        ? providerErrorDetails.error
+                        : {};
+                const retryMetaErrorSubcode =
+                    typeof retryMetaError.error_subcode === "number"
+                        ? retryMetaError.error_subcode
+                        : null;
 
                 // HTTP 5xx/network failures may have an ambiguous result:
                 // Meta may have processed the request before the connection
@@ -5206,6 +5403,13 @@ router.post(
                     .json({
                         success: false,
                         message,
+                        errorCode: retryMetaErrorSubcode === 2446404
+                            ? "META_BILLING_OPTION_NOT_AVAILABLE"
+                            : null,
+                        metaErrorSubcode: retryMetaErrorSubcode,
+                        accountBillingEligibility: retryMetaErrorSubcode === 2446404
+                            ? "REJECTED_BY_META_FOR_SELECTED_BILLING_EVENT"
+                            : "NOT_PRECHECKED",
                         failedStep: "Ad Set",
                         creationStatus: metaProvider.creationStatus,
                         campaignId: existingCampaignId,
@@ -5333,6 +5537,11 @@ router.post(
                     success: false,
                     message: "Meta provider configuration is missing.",
                 });
+            }
+
+            const liveCreationBlockReason = getMetaCatalogLiveCreationBlockReason(metaProvider.configuration);
+            if (liveCreationBlockReason) {
+                return res.status(403).json({ success: false, message: liveCreationBlockReason });
             }
 
             // Only allow retry after an actual Creative failure.
@@ -6390,6 +6599,69 @@ router.get(
 );
 
 // ==========================================
+// META AD SET BILLING CAPABILITY LOOKUP
+// ==========================================
+
+router.get("/lookups/meta/billing-events", async (req, res) => {
+    const { userId } = getAuth(req);
+
+    if (!userId) {
+        return res.status(401).json({ success: false, message: "Authentication required." });
+    }
+
+    const adAccountId = typeof req.query.accountId === "string" ? req.query.accountId.trim() : "";
+    const campaignObjective = typeof req.query.objective === "string" ? req.query.objective.trim().toUpperCase() : "";
+    const optimizationGoal = typeof req.query.optimizationGoal === "string" ? req.query.optimizationGoal.trim().toUpperCase() : "";
+
+    if (!adAccountId || !campaignObjective || !optimizationGoal) {
+        return res.status(400).json({
+            success: false,
+            message: "accountId, objective and optimizationGoal are required.",
+        });
+    }
+
+    try {
+        const account = await AdAccountModel.findOne({
+            userId,
+            provider: "metaAds",
+            externalAccountId: adAccountId,
+            status: "active",
+        })
+            .select("_id externalAccountId")
+            .lean();
+
+        if (!account) {
+            return res.status(403).json({
+                success: false,
+                message: "The selected Meta Ad Account is inactive, unavailable, or does not belong to this user.",
+            });
+        }
+
+        const capabilities = getMetaAdsBillingCapabilities({
+            adAccountId,
+            campaignObjective,
+            optimizationGoal,
+        });
+
+        return res.status(200).json({
+            success: true,
+            provider: "metaAds",
+            ...capabilities,
+            note: "These options are allowlisted by AdSyntra for the configured Meta API version. Meta still decides account-specific billing eligibility during Ad Set creation.",
+        });
+    } catch (error) {
+        const statusCode = error instanceof MetaAdsCampaignCreationError ? error.statusCode : 500;
+        return res.status(statusCode).json({
+            success: false,
+            message: getErrorMessage(error),
+            ...(error instanceof MetaAdsCampaignCreationError && error.details !== undefined
+                ? { details: error.details }
+                : {}),
+        });
+    }
+});
+
+// ==========================================
 // META FACEBOOK PAGE & INSTAGRAM IDENTITY LOOKUP
 // ==========================================
 
@@ -6451,6 +6723,431 @@ router.get("/lookups/meta/pages", async (req, res) => {
         });
     }
 });
+
+router.post(
+    "/:campaignId/meta/resume",
+    async (req: Request, res: Response) => {
+        let claimedCampaign: any = null;
+        let retryClaimed = false;
+
+        try {
+            const { userId } = getAuth(req);
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Authentication required.",
+                });
+            }
+
+            const localCampaignId = String(req.params.campaignId ?? "");
+            if (!/^[a-fA-F0-9]{24}$/.test(localCampaignId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid application campaign ID.",
+                });
+            }
+
+            const body = isRecord(req.body) ? req.body : {};
+            if (body.confirm !== true) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Meta campaign resume requires confirm: true.",
+                });
+            }
+
+            const storedCampaign: any = await CampaignModel.findOne({
+                _id: localCampaignId,
+                ownerUserId: userId,
+            });
+
+            if (!storedCampaign) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Campaign was not found.",
+                });
+            }
+
+            if (!storedCampaign.platforms.includes("metaAds")) {
+                return res.status(409).json({
+                    success: false,
+                    message: "This campaign does not include Meta Ads.",
+                });
+            }
+
+            const storedMetaProvider = storedCampaign.providers?.metaAds;
+            if (!storedMetaProvider) {
+                return res.status(409).json({
+                    success: false,
+                    message: "Meta provider configuration is missing.",
+                });
+            }
+
+            const priorStatus = String(storedMetaProvider.creationStatus ?? "");
+            const allowedResumeStatuses = [
+                "partial",
+                "needs_attention",
+                "meta_creation_in_progress",
+                "meta_resume_in_progress",
+            ];
+            if (!allowedResumeStatuses.includes(priorStatus)) {
+                return res.status(409).json({
+                    success: false,
+                    message: "Meta resume is allowed only for a partially-created, needs-attention, or stale in-progress Catalog campaign.",
+                    creationStatus: priorStatus || null,
+                });
+            }
+
+            const isInProgressStatus = [
+                "meta_creation_in_progress",
+                "meta_resume_in_progress",
+            ].includes(priorStatus);
+            const lastProgressAt = storedMetaProvider.lastSyncedAt
+                ? new Date(storedMetaProvider.lastSyncedAt).getTime()
+                : 0;
+            const staleAfterMs = 10 * 60 * 1000;
+            const hasProgressTimestamp =
+                Number.isFinite(lastProgressAt) && lastProgressAt > 0;
+            const isStaleInProgress =
+                isInProgressStatus &&
+                (!hasProgressTimestamp || Date.now() - lastProgressAt >= staleAfterMs);
+
+            if (isInProgressStatus && !isStaleInProgress) {
+                return res.status(409).json({
+                    success: false,
+                    message: "A Meta creation or resume operation is still marked in progress. Wait for it to finish before retrying.",
+                    creationStatus: priorStatus,
+                });
+            }
+
+            if (isStaleInProgress && body.confirmMissingResources !== true) {
+                return res.status(409).json({
+                    success: false,
+                    message: "The previous Meta operation appears to have stopped without completing. Check Ads Manager for every resource created after the last checkpoint, then send confirmMissingResources: true only after confirming the missing resources do not already exist.",
+                    requiresResourceReconciliation: true,
+                    creationStatus: priorStatus,
+                    lastSyncedAt: storedMetaProvider.lastSyncedAt ?? null,
+                });
+            }
+
+            const account = await AdAccountModel.findOne({
+                userId,
+                provider: "metaAds",
+                externalAccountId: storedMetaProvider.accountId,
+                status: "active",
+            })
+                .select("_id externalAccountId")
+                .lean();
+
+            if (!account) {
+                return res.status(403).json({
+                    success: false,
+                    message: "The Meta Ad Account is inactive, unavailable, or does not belong to this user.",
+                });
+            }
+
+            const configuration = isRecord(storedMetaProvider.configuration)
+                ? storedMetaProvider.configuration
+                : null;
+            if (!configuration) {
+                return res.status(422).json({
+                    success: false,
+                    message: "Saved Meta campaign configuration is missing.",
+                });
+            }
+
+            const creativeDraft = isRecord(configuration.creative)
+                ? configuration.creative
+                : isRecord(configuration.ad) && isRecord(configuration.ad.creativeDraft)
+                    ? configuration.ad.creativeDraft
+                    : null;
+            const catalogConfig = isRecord(configuration.catalog)
+                ? configuration.catalog
+                : null;
+            const creativeFormat = String(
+                creativeDraft ? getConfigValue(creativeDraft, "format", "creativeFormat") ?? "" : "",
+            ).trim().toUpperCase();
+
+            // This recovery route is intentionally limited to the currently
+            // implemented Catalog Dynamic Product Ads workflow.
+            if (!creativeDraft || creativeFormat !== "CATALOG_TEMPLATE" || !catalogConfig || catalogConfig.enabled !== true) {
+                return res.status(409).json({
+                    success: false,
+                    message: "This resume endpoint currently supports Meta Catalog Dynamic Product Ads only.",
+                });
+            }
+
+            const liveCreationBlockReason = getMetaCatalogLiveCreationBlockReason(configuration);
+            if (liveCreationBlockReason) {
+                return res.status(403).json({ success: false, message: liveCreationBlockReason });
+            }
+
+            const catalogId = optionalConfigString(
+                catalogConfig,
+                ["catalogId", "catalog_id"],
+                "Meta Product Catalog ID",
+            );
+            const productSetId = optionalConfigString(
+                catalogConfig,
+                ["productSetId", "product_set_id"],
+                "Meta Product Set ID",
+            );
+            if (!catalogId || !/^\d+$/.test(catalogId) || !productSetId || !/^\d+$/.test(productSetId)) {
+                return res.status(422).json({
+                    success: false,
+                    message: "The saved Catalog or Product Set ID is missing or invalid. Re-select the Catalog and Product Set before resuming.",
+                });
+            }
+
+            const resources = Array.isArray(storedMetaProvider.resources)
+                ? storedMetaProvider.resources
+                : [];
+            const campaignResourceId = getMetaCampaignResourceId(resources, "campaign");
+            const storedCampaignId = typeof storedMetaProvider.providerCampaignId === "string"
+                ? storedMetaProvider.providerCampaignId.trim()
+                : "";
+            if (storedCampaignId && campaignResourceId && storedCampaignId !== campaignResourceId) {
+                return res.status(409).json({
+                    success: false,
+                    message: "The stored Meta Campaign ID conflicts with the Campaign resource record. Reconcile the IDs before retrying.",
+                });
+            }
+            const existingCampaignId = storedCampaignId || campaignResourceId;
+            if (!existingCampaignId || !/^\d+$/.test(existingCampaignId)) {
+                return res.status(409).json({
+                    success: false,
+                    message: "No verified Meta Campaign ID is stored. Check Ads Manager before attempting another creation; this resume flow will not create a second Campaign.",
+                    requiresManualReconciliation: true,
+                });
+            }
+
+            const existingResourceIds = {
+                adSetId: getMetaCampaignResourceId(resources, "adSet"),
+                creativeId: getMetaCampaignResourceId(resources, "creative"),
+                adId: getMetaCampaignResourceId(resources, "ad"),
+            };
+            const missingResources = [
+                ...(!existingResourceIds.adSetId ? ["Ad Set"] : []),
+                ...(!existingResourceIds.creativeId ? ["Ad Creative"] : []),
+                ...(!existingResourceIds.adId ? ["Ad"] : []),
+            ];
+            if (missingResources.length > 0 && body.confirmMissingResources !== true) {
+                return res.status(409).json({
+                    success: false,
+                    message: "One or more Meta child resource IDs are not saved. Check the selected Meta Ad Account in Ads Manager and confirm that these resources do not already exist before resuming.",
+                    requiresResourceReconciliation: true,
+                    existingCampaignId,
+                    missingResources,
+                });
+            }
+
+            const context = await getMetaAdsCreationContext(
+                userId,
+                storedMetaProvider.accountId,
+            );
+            const catalogLookup = await getMetaCatalogsForSelectedAccount(context);
+            const selectedCatalog = catalogLookup.catalogs.find(
+                (item: Record<string, any>) => item.id === catalogId,
+            );
+            if (!selectedCatalog || selectedCatalog.isCatalogSegment === true || selectedCatalog.isLocalCatalog === true) {
+                return res.status(422).json({
+                    success: false,
+                    message: "The saved Meta Catalog is no longer accessible to this Ad Account or is not supported for this website-commerce workflow.",
+                });
+            }
+            if (typeof selectedCatalog.productCount === "number" && selectedCatalog.productCount <= 0) {
+                return res.status(422).json({
+                    success: false,
+                    message: "The saved Meta Catalog currently contains no products.",
+                });
+            }
+
+            const productSetLookup = await getMetaProductSetsForSelectedAccount(context, catalogId);
+            const selectedProductSet = productSetLookup.productSets.find(
+                (item: Record<string, any>) => item.id === productSetId,
+            );
+            if (!selectedProductSet || (typeof selectedProductSet.productCount === "number" && selectedProductSet.productCount <= 0)) {
+                return res.status(422).json({
+                    success: false,
+                    message: "The saved Meta Product Set is no longer accessible or contains no products. Select an available Product Set before resuming.",
+                });
+            }
+
+            await validateMetaCampaignPrerequisites(
+                userId,
+                storedMetaProvider.accountId,
+                configuration,
+            );
+
+            const bundleInput = buildMetaCampaignBundleInput(
+                storedCampaign.name,
+                typeof storedCampaign.websiteUrl === "string" ? storedCampaign.websiteUrl : null,
+                String(storedMetaProvider.providerObjective ?? storedCampaign.objective ?? ""),
+                configuration,
+                storedMetaProvider.accountId,
+                {
+                    validateOnly: false,
+                    confirm: true,
+                    metaValidateCampaign: false,
+                },
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                { catalogId, productSetId },
+            );
+
+            // Atomic status transition prevents two resume requests from
+            // creating the same missing Ad Set, Creative or Ad concurrently.
+            claimedCampaign = await CampaignModel.findOneAndUpdate(
+                {
+                    _id: localCampaignId,
+                    ownerUserId: userId,
+                    "providers.metaAds.creationStatus": priorStatus,
+                },
+                {
+                    $set: {
+                        "providers.metaAds.creationStatus": "meta_resume_in_progress",
+                        // Refresh the lease in the same atomic write as the claim.
+                        "providers.metaAds.lastSyncedAt": new Date(),
+                    },
+                },
+                { new: true },
+            );
+
+            if (!claimedCampaign) {
+                return res.status(409).json({
+                    success: false,
+                    message: "Another Meta operation has already claimed this campaign, or its status changed. Refresh the campaign before retrying.",
+                });
+            }
+            retryClaimed = true;
+
+            const metaProvider = claimedCampaign.providers.metaAds;
+            metaProvider.lastSyncedAt = new Date();
+            claimedCampaign.markModified("providers.metaAds");
+            await claimedCampaign.save();
+
+            const checkpoint = async (resource: { resourceType: MetaCampaignResourceType; resourceId: string }) => {
+                upsertMetaCampaignResource(metaProvider, resource.resourceType, resource.resourceId);
+                metaProvider.creationStatus = "meta_resume_in_progress";
+                metaProvider.lastError = null;
+                metaProvider.lastSyncedAt = new Date();
+                claimedCampaign.markModified("providers.metaAds");
+                await claimedCampaign.save();
+            };
+
+            const result = await resumeMetaAdsCampaignForUser(
+                userId,
+                metaProvider.accountId,
+                bundleInput,
+                {
+                    campaignId: existingCampaignId,
+                    existingResourceIds,
+                    confirmMissingResources: body.confirmMissingResources === true,
+                },
+                checkpoint,
+            );
+
+            upsertMetaCampaignResource(metaProvider, "campaign", result.campaign.campaignId!);
+            if (result.adSet.adSetId) upsertMetaCampaignResource(metaProvider, "adSet", result.adSet.adSetId);
+            if (result.creative.creativeId) upsertMetaCampaignResource(metaProvider, "creative", result.creative.creativeId);
+            if (result.ad.adId) upsertMetaCampaignResource(metaProvider, "ad", result.ad.adId);
+            metaProvider.creationStatus = "created";
+            metaProvider.providerCampaignId = existingCampaignId;
+            metaProvider.providerStatus = "PAUSED";
+            metaProvider.deliveryStatus = "PAUSED";
+            metaProvider.lastError = null;
+            metaProvider.lastSyncedAt = new Date();
+            claimedCampaign.markModified("providers.metaAds");
+            await claimedCampaign.save();
+
+            return res.status(200).json({
+                success: true,
+                message: "Meta Catalog Dynamic Ads setup resumed successfully. All created objects remain PAUSED.",
+                campaign: {
+                    id: claimedCampaign._id.toString(),
+                    name: claimedCampaign.name,
+                },
+                provider: {
+                    provider: "metaAds",
+                    accountId: metaProvider.accountId,
+                    creationStatus: metaProvider.creationStatus,
+                    campaignId: existingCampaignId,
+                    reusedResources: result.reusedResources,
+                    adSetId: result.adSet.adSetId,
+                    creativeId: result.creative.creativeId,
+                    adId: result.ad.adId,
+                    deliveryStatus: "PAUSED",
+                },
+                resources: metaProvider.resources,
+            });
+        } catch (error) {
+            const message = getErrorMessage(error);
+            const providerErrorDetails = error instanceof MetaAdsCampaignCreationError
+                ? error.details ?? null
+                : null;
+
+            if (retryClaimed && claimedCampaign?.providers?.metaAds) {
+                const metaProvider = claimedCampaign.providers.metaAds;
+                const details = error instanceof MetaAdsCampaignCreationError && isRecord(error.details)
+                    ? error.details
+                    : {};
+                const partial = isRecord(details.partialResult) ? details.partialResult : {};
+                const partialCampaign = isRecord(partial.campaign) ? partial.campaign : {};
+                const partialAdSet = isRecord(partial.adSet) ? partial.adSet : {};
+                const partialCreative = isRecord(partial.creative) ? partial.creative : {};
+                const partialAd = isRecord(partial.ad) ? partial.ad : {};
+
+                if (typeof partialCampaign.campaignId === "string") {
+                    upsertMetaCampaignResource(metaProvider, "campaign", partialCampaign.campaignId);
+                }
+                if (typeof partialAdSet.adSetId === "string") {
+                    upsertMetaCampaignResource(metaProvider, "adSet", partialAdSet.adSetId);
+                }
+                if (typeof partialCreative.creativeId === "string") {
+                    upsertMetaCampaignResource(metaProvider, "creative", partialCreative.creativeId);
+                }
+                if (typeof partialAd.adId === "string") {
+                    upsertMetaCampaignResource(metaProvider, "ad", partialAd.adId);
+                }
+
+                const ambiguousOutcome =
+                    !(error instanceof MetaAdsCampaignCreationError) ||
+                    error.statusCode >= 500;
+                metaProvider.creationStatus = ambiguousOutcome ? "needs_attention" : "partial";
+                metaProvider.providerStatus = metaProvider.providerCampaignId ? "PAUSED" : null;
+                metaProvider.deliveryStatus = "PAUSED";
+                metaProvider.lastError = message;
+                metaProvider.lastSyncedAt = new Date();
+                claimedCampaign.markModified("providers.metaAds");
+                try {
+                    await claimedCampaign.save();
+                } catch (saveError) {
+                    console.error("Failed to persist Meta resume failure state:", getErrorMessage(saveError));
+                }
+            }
+
+            const statusCode = error instanceof MetaAdsCampaignCreationError
+                ? error.statusCode
+                : error instanceof MetaCommerceLookupError
+                    ? error.statusCode
+                    : error instanceof MetaCampaignPrerequisiteError
+                        ? error.statusCode
+                        : error instanceof CampaignRequestValidationError
+                            ? 400
+                            : 502;
+
+            return res.status(statusCode).json({
+                success: false,
+                message,
+                ...(retryClaimed && claimedCampaign?.providers?.metaAds
+                    ? { creationStatus: claimedCampaign.providers.metaAds.creationStatus }
+                    : {}),
+                ...(providerErrorDetails !== null ? { providerErrorDetails } : {}),
+            });
+        }
+    },
+);
 
 router.post("/rename", async (req: Request, res: Response) => {
     try {

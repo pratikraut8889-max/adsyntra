@@ -934,15 +934,15 @@ type MetaAppStorePlatform = "ANDROID" | "IOS";
 
 type MetaAppStoreListingResolution =
   | {
-      valid: true;
-      platform: MetaAppStorePlatform;
-      url: string;
-      storeListingId: string;
-    }
+    valid: true;
+    platform: MetaAppStorePlatform;
+    url: string;
+    storeListingId: string;
+  }
   | {
-      valid: false;
-      message: string;
-    };
+    valid: false;
+    message: string;
+  };
 
 /**
  * Resolve a platform-specific public store listing for a Meta App.
@@ -1047,14 +1047,14 @@ type GoogleAppStore = "GOOGLE_APP_STORE" | "APPLE_APP_STORE";
 
 type GoogleAppIdentityResolution =
   | {
-      valid: true;
-      normalizedAppId: string;
-      source: "NATIVE_ID" | "STORE_URL";
-    }
+    valid: true;
+    normalizedAppId: string;
+    source: "NATIVE_ID" | "STORE_URL";
+  }
   | {
-      valid: false;
-      message: string;
-    };
+    valid: false;
+    message: string;
+  };
 
 /**
  * Google Ads AppCampaignSetting.app_id accepts the native store identifier:
@@ -1860,7 +1860,7 @@ async function fetchGoogleMerchantCenterLookup<T>(
     throw new Error(
       String(
         message ||
-          `Merchant Center ${endpoint} lookup failed (${response.status}).`,
+        `Merchant Center ${endpoint} lookup failed (${response.status}).`,
       ),
     );
   }
@@ -2071,22 +2071,22 @@ export default function CreateCampaignPage() {
   });
 
   const [googleMerchantCenterId, setGoogleMerchantCenterId] =
-  useState("");
+    useState("");
 
-const [googleShoppingPriority, setGoogleShoppingPriority] =
-  useState("0");
+  const [googleShoppingPriority, setGoogleShoppingPriority] =
+    useState("0");
 
-const [googleShoppingFeedLabel, setGoogleShoppingFeedLabel] =
-  useState("");
+  const [googleShoppingFeedLabel, setGoogleShoppingFeedLabel] =
+    useState("");
 
-const [googleShoppingContentLanguage, setGoogleShoppingContentLanguage] =
-  useState("");
+  const [googleShoppingContentLanguage, setGoogleShoppingContentLanguage] =
+    useState("");
 
-const [googleShoppingProductGroupType, setGoogleShoppingProductGroupType] =
-  useState("ALL_PRODUCTS");
+  const [googleShoppingProductGroupType, setGoogleShoppingProductGroupType] =
+    useState("ALL_PRODUCTS");
 
-const [googleShoppingProductGroupValue, setGoogleShoppingProductGroupValue] =
-  useState("");
+  const [googleShoppingProductGroupValue, setGoogleShoppingProductGroupValue] =
+    useState("");
   // inside your Locations <Box sx={{ flex: 1 }}>
   const locationAnchorRef = useRef(null);
   const [locationOpen, setLocationOpen] = useState(false);
@@ -2584,62 +2584,62 @@ const [googleShoppingProductGroupValue, setGoogleShoppingProductGroupValue] =
   const [googleMerchantCenterLoading, setGoogleMerchantCenterLoading] = useState(false);
   const [googleMerchantCenterError, setGoogleMerchantCenterError] = useState("");
 
-const [googleMerchantCenterLinks, setGoogleMerchantCenterLinks] =
-  useState<GoogleMerchantCenterLink[]>([]);
-const [googleMerchantCenterLinksLoading, setGoogleMerchantCenterLinksLoading] =
-  useState(false);
-const [googleMerchantCenterLinksError, setGoogleMerchantCenterLinksError] =
-  useState("");
+  const [googleMerchantCenterLinks, setGoogleMerchantCenterLinks] =
+    useState<GoogleMerchantCenterLink[]>([]);
+  const [googleMerchantCenterLinksLoading, setGoogleMerchantCenterLinksLoading] =
+    useState(false);
+  const [googleMerchantCenterLinksError, setGoogleMerchantCenterLinksError] =
+    useState("");
 
-const [googleHotelCenterLinks, setGoogleHotelCenterLinks] =
-  useState<GoogleHotelCenterLink[]>([]);
-const [googleHotelCenterPendingInvitations, setGoogleHotelCenterPendingInvitations] =
-  useState<GoogleHotelCenterLink[]>([]);
-const [googleHotelCenterLoading, setGoogleHotelCenterLoading] =
-  useState(false);
-const [googleHotelCenterError, setGoogleHotelCenterError] = useState("");
+  const [googleHotelCenterLinks, setGoogleHotelCenterLinks] =
+    useState<GoogleHotelCenterLink[]>([]);
+  const [googleHotelCenterPendingInvitations, setGoogleHotelCenterPendingInvitations] =
+    useState<GoogleHotelCenterLink[]>([]);
+  const [googleHotelCenterLoading, setGoogleHotelCenterLoading] =
+    useState(false);
+  const [googleHotelCenterError, setGoogleHotelCenterError] = useState("");
 
-const [googleMerchantCenterDataSources, setGoogleMerchantCenterDataSources] =
-  useState<GoogleMerchantCenterDataSource[]>([]);
-const [googleMerchantCenterDataSourcesLoading, setGoogleMerchantCenterDataSourcesLoading] =
-  useState(false);
-const [googleMerchantCenterDataSourcesError, setGoogleMerchantCenterDataSourcesError] =
-  useState("");
+  const [googleMerchantCenterDataSources, setGoogleMerchantCenterDataSources] =
+    useState<GoogleMerchantCenterDataSource[]>([]);
+  const [googleMerchantCenterDataSourcesLoading, setGoogleMerchantCenterDataSourcesLoading] =
+    useState(false);
+  const [googleMerchantCenterDataSourcesError, setGoogleMerchantCenterDataSourcesError] =
+    useState("");
 
-const [googleMerchantCenterFeedLabels, setGoogleMerchantCenterFeedLabels] =
-  useState<GoogleMerchantCenterFeedLabelOption[]>([]);
-const [googleMerchantCenterFeedLabelsLoading, setGoogleMerchantCenterFeedLabelsLoading] =
-  useState(false);
-const [googleMerchantCenterFeedLabelsError, setGoogleMerchantCenterFeedLabelsError] =
-  useState("");
+  const [googleMerchantCenterFeedLabels, setGoogleMerchantCenterFeedLabels] =
+    useState<GoogleMerchantCenterFeedLabelOption[]>([]);
+  const [googleMerchantCenterFeedLabelsLoading, setGoogleMerchantCenterFeedLabelsLoading] =
+    useState(false);
+  const [googleMerchantCenterFeedLabelsError, setGoogleMerchantCenterFeedLabelsError] =
+    useState("");
 
-const [googleMerchantCenterProducts, setGoogleMerchantCenterProducts] =
-  useState<GoogleMerchantCenterProduct[]>([]);
-const [googleMerchantCenterProductsLoading, setGoogleMerchantCenterProductsLoading] =
-  useState(false);
-const [googleMerchantCenterProductsError, setGoogleMerchantCenterProductsError] =
-  useState("");
+  const [googleMerchantCenterProducts, setGoogleMerchantCenterProducts] =
+    useState<GoogleMerchantCenterProduct[]>([]);
+  const [googleMerchantCenterProductsLoading, setGoogleMerchantCenterProductsLoading] =
+    useState(false);
+  const [googleMerchantCenterProductsError, setGoogleMerchantCenterProductsError] =
+    useState("");
 
 
-const [
-  googleMerchantDeveloperEmail,
-  setGoogleMerchantDeveloperEmail,
-] = useState("");
+  const [
+    googleMerchantDeveloperEmail,
+    setGoogleMerchantDeveloperEmail,
+  ] = useState("");
 
-const [
-  googleMerchantRegistrationLoading,
-  setGoogleMerchantRegistrationLoading,
-] = useState(false);
+  const [
+    googleMerchantRegistrationLoading,
+    setGoogleMerchantRegistrationLoading,
+  ] = useState(false);
 
-const [
-  googleMerchantRegistrationError,
-  setGoogleMerchantRegistrationError,
-] = useState("");
+  const [
+    googleMerchantRegistrationError,
+    setGoogleMerchantRegistrationError,
+  ] = useState("");
 
-const [
-  googleMerchantRegistrationSuccess,
-  setGoogleMerchantRegistrationSuccess,
-] = useState("");
+  const [
+    googleMerchantRegistrationSuccess,
+    setGoogleMerchantRegistrationSuccess,
+  ] = useState("");
 
 
 
@@ -3417,11 +3417,11 @@ const [
 
     const selectedAccountId = connections.googleAds.selectedAccountId;
     const needsMerchantCenter =
-  googleCampaignType === "SHOPPING" ||
-  (
-    googleCampaignType === "DEMAND_GEN" &&
-    googleDemandGenFormat === "PRODUCT_FEED"
-  );
+      googleCampaignType === "SHOPPING" ||
+      (
+        googleCampaignType === "DEMAND_GEN" &&
+        googleDemandGenFormat === "PRODUCT_FEED"
+      );
 
     const resetMerchantCenter = () => {
       setGoogleMerchantCenterId("");
@@ -3437,7 +3437,7 @@ const [
     if (
       !isSignedIn ||
       !connections.googleAds.connected ||
-      !selectedAccountId || 
+      !selectedAccountId ||
       !needsMerchantCenter
     ) {
       resetMerchantCenter();
@@ -3522,276 +3522,276 @@ const [
   ]);
 
 
-useEffect(() => {
-  const needsMerchantCenter =
-  googleCampaignType === "SHOPPING" ||
-  (
-    googleCampaignType === "DEMAND_GEN" &&
-    googleDemandGenFormat === "PRODUCT_FEED"
-  );
-  if (
-    !isLoaded ||
-    !isSignedIn ||
-    !connections.googleAds.selectedAccountId ||
-    !googleMerchantCenterId ||
-    !needsMerchantCenter
-  ) {
-    setGoogleMerchantCenterDataSources([]);
-    setGoogleMerchantCenterFeedLabels([]);
-    setGoogleShoppingFeedLabel("");
-    setGoogleShoppingContentLanguage("");
+  useEffect(() => {
+    const needsMerchantCenter =
+      googleCampaignType === "SHOPPING" ||
+      (
+        googleCampaignType === "DEMAND_GEN" &&
+        googleDemandGenFormat === "PRODUCT_FEED"
+      );
+    if (
+      !isLoaded ||
+      !isSignedIn ||
+      !connections.googleAds.selectedAccountId ||
+      !googleMerchantCenterId ||
+      !needsMerchantCenter
+    ) {
+      setGoogleMerchantCenterDataSources([]);
+      setGoogleMerchantCenterFeedLabels([]);
+      setGoogleShoppingFeedLabel("");
+      setGoogleShoppingContentLanguage("");
 
-    setGoogleMerchantCenterDataSourcesLoading(false);
-    setGoogleMerchantCenterFeedLabelsLoading(false);
+      setGoogleMerchantCenterDataSourcesLoading(false);
+      setGoogleMerchantCenterFeedLabelsLoading(false);
 
-    return;
-  }
+      return;
+    }
 
-  let cancelled = false;
+    let cancelled = false;
 
-  const loadMerchantCenterResources = async () => {
-    setGoogleMerchantCenterDataSourcesLoading(true);
-    setGoogleMerchantCenterFeedLabelsLoading(true);
+    const loadMerchantCenterResources = async () => {
+      setGoogleMerchantCenterDataSourcesLoading(true);
+      setGoogleMerchantCenterFeedLabelsLoading(true);
 
-    setGoogleMerchantCenterDataSourcesError("");
-    setGoogleMerchantCenterFeedLabelsError("");
+      setGoogleMerchantCenterDataSourcesError("");
+      setGoogleMerchantCenterFeedLabelsError("");
 
-    try {
-      const token = await getToken();
+      try {
+        const token = await getToken();
 
-      if (!token) {
-        throw new Error("Unable to retrieve your Clerk authentication token.");
-      }
+        if (!token) {
+          throw new Error("Unable to retrieve your Clerk authentication token.");
+        }
 
-      const [sourcesResult, labelsResult] = await Promise.allSettled([
-        fetchGoogleMerchantCenterLookup<{
-          count?: number;
-          dataSources?: GoogleMerchantCenterDataSource[];
-        }>(
-          API_BASE_URL,
-          token,
-          "merchant-center-data-sources",
-          { merchantCenterId: googleMerchantCenterId },
-        ),
+        const [sourcesResult, labelsResult] = await Promise.allSettled([
+          fetchGoogleMerchantCenterLookup<{
+            count?: number;
+            dataSources?: GoogleMerchantCenterDataSource[];
+          }>(
+            API_BASE_URL,
+            token,
+            "merchant-center-data-sources",
+            { merchantCenterId: googleMerchantCenterId },
+          ),
 
-        fetchGoogleMerchantCenterLookup<{
-          count?: number;
-          feedLabels?: GoogleMerchantCenterFeedLabelOption[];
-        }>(
-          API_BASE_URL,
-          token,
-          "merchant-center-feed-labels",
-          { merchantCenterId: googleMerchantCenterId },
-        ),
-      ]);
+          fetchGoogleMerchantCenterLookup<{
+            count?: number;
+            feedLabels?: GoogleMerchantCenterFeedLabelOption[];
+          }>(
+            API_BASE_URL,
+            token,
+            "merchant-center-feed-labels",
+            { merchantCenterId: googleMerchantCenterId },
+          ),
+        ]);
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      let sources: GoogleMerchantCenterDataSource[] = [];
+        let sources: GoogleMerchantCenterDataSource[] = [];
 
-      if (sourcesResult.status === "fulfilled") {
-        sources = sourcesResult.value.dataSources ?? [];
-        setGoogleMerchantCenterDataSources(sources);
-      } else {
-        setGoogleMerchantCenterDataSources([]);
-        setGoogleMerchantCenterDataSourcesError(
-          sourcesResult.reason instanceof Error
-            ? sourcesResult.reason.message
-            : "Unable to load Merchant Center data sources.",
-        );
-      }
+        if (sourcesResult.status === "fulfilled") {
+          sources = sourcesResult.value.dataSources ?? [];
+          setGoogleMerchantCenterDataSources(sources);
+        } else {
+          setGoogleMerchantCenterDataSources([]);
+          setGoogleMerchantCenterDataSourcesError(
+            sourcesResult.reason instanceof Error
+              ? sourcesResult.reason.message
+              : "Unable to load Merchant Center data sources.",
+          );
+        }
 
-      let reportFeedLabels: GoogleMerchantCenterFeedLabelOption[] = [];
+        let reportFeedLabels: GoogleMerchantCenterFeedLabelOption[] = [];
 
-      if (labelsResult.status === "fulfilled") {
-        reportFeedLabels = labelsResult.value.feedLabels ?? [];
-      } else {
-        setGoogleMerchantCenterFeedLabelsError(
-          labelsResult.reason instanceof Error
-            ? labelsResult.reason.message
-            : "Unable to load Merchant Center feed labels.",
-        );
-      }
+        if (labelsResult.status === "fulfilled") {
+          reportFeedLabels = labelsResult.value.feedLabels ?? [];
+        } else {
+          setGoogleMerchantCenterFeedLabelsError(
+            labelsResult.reason instanceof Error
+              ? labelsResult.reason.message
+              : "Unable to load Merchant Center feed labels.",
+          );
+        }
 
-      // Use real primary product data sources as a fallback when the
-      // Reports API does not return feed labels.
-      const sourceFeedLabels = sources
-        .filter(
-          (source) =>
-            source.type === "PRIMARY_PRODUCT" ||
-            Boolean(source.primaryProductDataSource),
-        )
-        .map((source) => ({
-          feedLabel: String(
-            source.feedLabel ??
+        // Use real primary product data sources as a fallback when the
+        // Reports API does not return feed labels.
+        const sourceFeedLabels = sources
+          .filter(
+            (source) =>
+              source.type === "PRIMARY_PRODUCT" ||
+              Boolean(source.primaryProductDataSource),
+          )
+          .map((source) => ({
+            feedLabel: String(
+              source.feedLabel ??
               source.primaryProductDataSource?.feedLabel ??
               "",
-          ).trim(),
-          contentLanguage: String(
-            source.contentLanguage ??
+            ).trim(),
+            contentLanguage: String(
+              source.contentLanguage ??
               source.primaryProductDataSource?.contentLanguage ??
               "",
-          ).trim(),
-          countries: source.countries ??
-            source.primaryProductDataSource?.countries ??
-            [],
-        }));
+            ).trim(),
+            countries: source.countries ??
+              source.primaryProductDataSource?.countries ??
+              [],
+          }));
 
-      const uniqueLabels = new Map<
-        string,
-        GoogleMerchantCenterFeedLabelOption
-      >();
+        const uniqueLabels = new Map<
+          string,
+          GoogleMerchantCenterFeedLabelOption
+        >();
 
-      for (const item of [...sourceFeedLabels, ...reportFeedLabels]) {
-        const feedLabel = String(item.feedLabel ?? "").trim();
-        const contentLanguage = String(item.contentLanguage ?? "").trim();
+        for (const item of [...sourceFeedLabels, ...reportFeedLabels]) {
+          const feedLabel = String(item.feedLabel ?? "").trim();
+          const contentLanguage = String(item.contentLanguage ?? "").trim();
 
-        if (!feedLabel || !contentLanguage) continue;
+          if (!feedLabel || !contentLanguage) continue;
 
-        const key = `${feedLabel}|||${contentLanguage}`;
+          const key = `${feedLabel}|||${contentLanguage}`;
 
-        uniqueLabels.set(key, {
-          feedLabel,
-          contentLanguage,
-          countries: item.countries ?? [],
-        });
+          uniqueLabels.set(key, {
+            feedLabel,
+            contentLanguage,
+            countries: item.countries ?? [],
+          });
+        }
+
+        const options = [...uniqueLabels.values()];
+
+        setGoogleMerchantCenterFeedLabels(options);
+
+        const current = options.find(
+          (item) =>
+            item.feedLabel === googleShoppingFeedLabel &&
+            item.contentLanguage === googleShoppingContentLanguage,
+        );
+
+        const next = current ?? options[0];
+
+        setGoogleShoppingFeedLabel(next?.feedLabel ?? "");
+        setGoogleShoppingContentLanguage(next?.contentLanguage ?? "");
+      } catch (err) {
+        if (!cancelled) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Unable to load Merchant Center resources.";
+
+          setGoogleMerchantCenterDataSourcesError(message);
+          setGoogleMerchantCenterFeedLabelsError(message);
+        }
+      } finally {
+        if (!cancelled) {
+          setGoogleMerchantCenterDataSourcesLoading(false);
+          setGoogleMerchantCenterFeedLabelsLoading(false);
+        }
       }
+    };
 
-      const options = [...uniqueLabels.values()];
+    void loadMerchantCenterResources();
 
-      setGoogleMerchantCenterFeedLabels(options);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    getToken,
+    isLoaded,
+    isSignedIn,
+    connections.googleAds.selectedAccountId,
+    googleMerchantCenterId,
+  ]);
 
-      const current = options.find(
-        (item) =>
-          item.feedLabel === googleShoppingFeedLabel &&
-          item.contentLanguage === googleShoppingContentLanguage,
+
+  useEffect(() => {
+    const needsMerchantProducts =
+      googleCampaignType === "SHOPPING" ||
+      (
+        googleCampaignType === "DEMAND_GEN" &&
+        googleDemandGenFormat === "PRODUCT_FEED"
       );
 
-      const next = current ?? options[0];
-
-      setGoogleShoppingFeedLabel(next?.feedLabel ?? "");
-      setGoogleShoppingContentLanguage(next?.contentLanguage ?? "");
-    } catch (err) {
-      if (!cancelled) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Unable to load Merchant Center resources.";
-
-        setGoogleMerchantCenterDataSourcesError(message);
-        setGoogleMerchantCenterFeedLabelsError(message);
-      }
-    } finally {
-      if (!cancelled) {
-        setGoogleMerchantCenterDataSourcesLoading(false);
-        setGoogleMerchantCenterFeedLabelsLoading(false);
-      }
-    }
-  };
-
-  void loadMerchantCenterResources();
-
-  return () => {
-    cancelled = true;
-  };
-}, [
-  getToken,
-  isLoaded,
-  isSignedIn,
-  connections.googleAds.selectedAccountId,
-  googleMerchantCenterId,
-]);
-
-
-useEffect(() => {
-  const needsMerchantProducts =
-    googleCampaignType === "SHOPPING" ||
-    (
-      googleCampaignType === "DEMAND_GEN" &&
-      googleDemandGenFormat === "PRODUCT_FEED"
-    );
-
-  if (
-    !isLoaded ||
-    !isSignedIn ||
-    !connections.googleAds.selectedAccountId ||
-    !needsMerchantProducts ||
-    !googleMerchantCenterId ||
-    !googleShoppingFeedLabel ||
-    !googleShoppingContentLanguage
-  ) {
-    setGoogleMerchantCenterProducts([]);
-    setGoogleMerchantCenterProductsLoading(false);
-    setGoogleMerchantCenterProductsError("");
-    return;
-  }
-
-  let cancelled = false;
-
-  const loadMerchantProducts = async () => {
-    try {
-      setGoogleMerchantCenterProductsLoading(true);
+    if (
+      !isLoaded ||
+      !isSignedIn ||
+      !connections.googleAds.selectedAccountId ||
+      !needsMerchantProducts ||
+      !googleMerchantCenterId ||
+      !googleShoppingFeedLabel ||
+      !googleShoppingContentLanguage
+    ) {
+      setGoogleMerchantCenterProducts([]);
+      setGoogleMerchantCenterProductsLoading(false);
       setGoogleMerchantCenterProductsError("");
-
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Unable to retrieve your Clerk authentication token.");
-      }
-
-      const data =
-        await fetchGoogleMerchantCenterLookup<{
-          count?: number;
-          products?: GoogleMerchantCenterProduct[];
-          nextPageToken?: string | null;
-        }>(
-          API_BASE_URL,
-          token,
-          "merchant-center-products",
-          {
-            merchantCenterId: googleMerchantCenterId,
-            feedLabel: googleShoppingFeedLabel,
-            contentLanguage: googleShoppingContentLanguage,
-            pageSize: "50",
-          },
-        );
-
-      if (cancelled) return;
-
-      setGoogleMerchantCenterProducts(data.products ?? []);
-    } catch (err) {
-      if (!cancelled) {
-        setGoogleMerchantCenterProducts([]);
-
-        setGoogleMerchantCenterProductsError(
-          err instanceof Error
-            ? err.message
-            : "Unable to load Merchant Center products.",
-        );
-      }
-    } finally {
-      if (!cancelled) {
-        setGoogleMerchantCenterProductsLoading(false);
-      }
+      return;
     }
-  };
 
-  void loadMerchantProducts();
+    let cancelled = false;
 
-  return () => {
-    cancelled = true;
-  };
-}, [
-  getToken,
-  isLoaded,
-  isSignedIn,
-  connections.googleAds.selectedAccountId,
-  googleCampaignType,
-  googleDemandGenFormat,
-  googleMerchantCenterId,
-  googleShoppingFeedLabel,
-  googleShoppingContentLanguage,
-]);
+    const loadMerchantProducts = async () => {
+      try {
+        setGoogleMerchantCenterProductsLoading(true);
+        setGoogleMerchantCenterProductsError("");
+
+        const token = await getToken();
+
+        if (!token) {
+          throw new Error("Unable to retrieve your Clerk authentication token.");
+        }
+
+        const data =
+          await fetchGoogleMerchantCenterLookup<{
+            count?: number;
+            products?: GoogleMerchantCenterProduct[];
+            nextPageToken?: string | null;
+          }>(
+            API_BASE_URL,
+            token,
+            "merchant-center-products",
+            {
+              merchantCenterId: googleMerchantCenterId,
+              feedLabel: googleShoppingFeedLabel,
+              contentLanguage: googleShoppingContentLanguage,
+              pageSize: "50",
+            },
+          );
+
+        if (cancelled) return;
+
+        setGoogleMerchantCenterProducts(data.products ?? []);
+      } catch (err) {
+        if (!cancelled) {
+          setGoogleMerchantCenterProducts([]);
+
+          setGoogleMerchantCenterProductsError(
+            err instanceof Error
+              ? err.message
+              : "Unable to load Merchant Center products.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setGoogleMerchantCenterProductsLoading(false);
+        }
+      }
+    };
+
+    void loadMerchantProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    getToken,
+    isLoaded,
+    isSignedIn,
+    connections.googleAds.selectedAccountId,
+    googleCampaignType,
+    googleDemandGenFormat,
+    googleMerchantCenterId,
+    googleShoppingFeedLabel,
+    googleShoppingContentLanguage,
+  ]);
 
 
   // Campaign results are derived from the real POST /api/campaigns response.
@@ -4045,20 +4045,20 @@ useEffect(() => {
     : "";
   const configuredMetaOptimizationOptions = objective
     ? metaOptimizationOptions[objective].filter((item) => {
-        const registryGoals = selectedMetaCampaignCapability?.options
-          ?.optimizationGoalsByObjective?.[selectedMetaProviderObjective];
-        return !registryGoals || registryGoals.some((option) => option.value === item.value);
-      })
+      const registryGoals = selectedMetaCampaignCapability?.options
+        ?.optimizationGoalsByObjective?.[selectedMetaProviderObjective];
+      return !registryGoals || registryGoals.some((option) => option.value === item.value);
+    })
     : [];
   // Catalog Sales is a destination-specific Sales workflow using Meta's
   // documented OUTCOME_SALES + WEBSITE + LINK_CLICKS mapping.
   const availableMetaOptimizationOptions = metaCatalogCreativeEnabled && objective === "SALES"
     ? [
-        ...configuredMetaOptimizationOptions,
-        ...(!configuredMetaOptimizationOptions.some((item) => item.value === "LINK_CLICKS")
-          ? [{ value: "LINK_CLICKS", label: "Link Clicks (Catalog Dynamic Ads)" }]
-          : []),
-      ]
+      ...configuredMetaOptimizationOptions,
+      ...(!configuredMetaOptimizationOptions.some((item) => item.value === "LINK_CLICKS")
+        ? [{ value: "LINK_CLICKS", label: "Link Clicks (Catalog Dynamic Ads)" }]
+        : []),
+    ]
     : configuredMetaOptimizationOptions;
   const availableMetaBuyingTypes = metaBuyingTypes.filter((item) => {
     const registryOptions = selectedMetaCampaignCapability?.options?.buyingTypes;
@@ -4079,6 +4079,12 @@ useEffect(() => {
       (!option.implementationStatus || option.implementationStatus === "IMPLEMENTED_IN_SOURCE"),
     );
   });
+  const isMetaCatalogLiveTest =
+    metaCatalogCreativeEnabled &&
+    selectedPlatforms.length === 1 &&
+    selectedPlatforms[0] === "metaAds";
+  const metaCatalogLiveUiEnabled =
+    process.env.NEXT_PUBLIC_META_CATALOG_LIVE_CREATION_ENABLED === "true";
   const selectedLiveProviderStates = [
     ...(selectedPlatforms.includes("googleAds")
       ? [{ provider: "Google Ads", capability: selectedGoogleCampaignCapability }]
@@ -4088,15 +4094,20 @@ useEffect(() => {
       : []),
   ];
   const liveExecutionReadyProviders = selectedLiveProviderStates
-    .filter(({ capability }) =>
+    .filter(({ provider, capability }) =>
+      (provider === "Meta Ads" && isMetaCatalogLiveTest && metaCatalogLiveUiEnabled) ||
       capability?.operations.create?.status === "IMPLEMENTED_IN_SOURCE",
     )
     .map(({ provider }) => provider);
   const liveExecutionBlockedProviderReasons = selectedLiveProviderStates
-    .filter(({ capability }) =>
+    .filter(({ provider, capability }) =>
+      !(provider === "Meta Ads" && isMetaCatalogLiveTest && metaCatalogLiveUiEnabled) &&
       capability?.operations.create?.status !== "IMPLEMENTED_IN_SOURCE",
     )
     .map(({ provider, capability }) => {
+      if (provider === "Meta Ads" && isMetaCatalogLiveTest && !metaCatalogLiveUiEnabled) {
+        return "Meta Catalog live testing is disabled in the frontend. Set NEXT_PUBLIC_META_CATALOG_LIVE_CREATION_ENABLED=true and restart the frontend.";
+      }
       if (!capability) return `${provider} campaign type is not registered for creation.`;
       const detail = capability.operations.create;
       return `${provider} ${capability.label}: ${detail?.summary ?? "Creation is not enabled."}`;
@@ -4108,8 +4119,8 @@ useEffect(() => {
       : "";
   const liveExecutionWarning = liveExecutionReadyProviders.length > 0 &&
     liveExecutionBlockedProviderReasons.length > 0
-      ? `Live execution will proceed only for ${liveExecutionReadyProviders.join(" and ")}. The following provider branch(es) will be rejected independently: ${liveExecutionBlockedProviderReasons.join(" ")}`
-      : "";
+    ? `Live execution will proceed only for ${liveExecutionReadyProviders.join(" and ")}. The following provider branch(es) will be rejected independently: ${liveExecutionBlockedProviderReasons.join(" ")}`
+    : "";
 
   useEffect(() => {
     if (executionMode === "LIVE" && liveExecutionBlockReason) {
@@ -4150,8 +4161,8 @@ useEffect(() => {
   const effectiveMetaOptimizationGoal = metaCatalogCreativeEnabled
     ? "LINK_CLICKS"
     : availableMetaOptimizationOptions.some(
-        (item) => item.value === metaOptimizationGoal,
-      )
+      (item) => item.value === metaOptimizationGoal,
+    )
       ? metaOptimizationGoal
       : availableMetaOptimizationOptions[0]?.value || "";
   const availableMetaBillingOptions =
@@ -4160,8 +4171,8 @@ useEffect(() => {
   const effectiveMetaBillingEvent = metaCatalogCreativeEnabled
     ? "LINK_CLICKS"
     : availableMetaBillingOptions.some(
-        (item) => item.value === metaBillingEvent,
-      )
+      (item) => item.value === metaBillingEvent,
+    )
       ? metaBillingEvent
       : availableMetaBillingOptions[0]?.value || "IMPRESSIONS";
 
@@ -6392,7 +6403,7 @@ useEffect(() => {
         assignment.capabilityId === "google-display-responsive-display" &&
         assignment.requirementId === requirementId
       );
-  });
+    });
 
   const isAiStudioLogo = (asset: LibraryAsset) =>
     asset.kind === "LOGO" && asset.origin === "AI_STUDIO";
@@ -7156,7 +7167,7 @@ useEffect(() => {
             providerUploadRequired:
               asset.kind !== "TEXT" && Boolean(asset.contentUrl),
             ...(campaignCreativeTarget &&
-            intendedPlatforms.includes(campaignCreativeTarget.platform)
+              intendedPlatforms.includes(campaignCreativeTarget.platform)
               ? { campaignCreativeTarget }
               : {}),
             note:
@@ -8124,7 +8135,7 @@ useEffect(() => {
           providerUploadRequired:
             asset.kind !== "TEXT" && Boolean(asset.contentUrl),
           ...(campaignCreativeTarget &&
-          intendedPlatforms.includes(campaignCreativeTarget.platform)
+            intendedPlatforms.includes(campaignCreativeTarget.platform)
             ? { campaignCreativeTarget }
             : {}),
           note: asset.contentUrl
@@ -8164,7 +8175,12 @@ useEffect(() => {
         [
           "You are about to create real advertising resources.",
           "",
-          "Google Ads and Meta Ads will be processed independently.",
+          ...(isMetaCatalogLiveTest
+            ? [
+              "This controlled test creates a Meta Catalog Dynamic Product Ads Campaign, Ad Set, Creative and Ad in the selected Meta Ad Account.",
+              "No Google Ads branch will be submitted.",
+            ]
+            : ["Google Ads and Meta Ads will be processed independently."]),
           "All successfully created resources are intended to start PAUSED.",
           "",
           "A provider failure may happen after some parent resources have already been created.",
@@ -9153,11 +9169,11 @@ useEffect(() => {
       }
       const selectedMetaMessagingIdentity = metaDestinationType === "MESSAGING"
         ? metaMessagingDestinationOptions.find((destination) =>
-            destination.type === metaMessagingType &&
-            destination.id === metaMessagingDestinationId &&
-            destination.pageId === pageId &&
-            destination.isAvailable,
-          )
+          destination.type === metaMessagingType &&
+          destination.id === metaMessagingDestinationId &&
+          destination.pageId === pageId &&
+          destination.isAvailable,
+        )
         : undefined;
       if (metaDestinationType === "APP") {
         if (selectedPlatforms.some((platform) => platform !== "metaAds")) {
@@ -9536,34 +9552,34 @@ useEffect(() => {
                 },
               }
               : metaDestinationType === "INSTANT_FORM" || metaDestinationType === "MESSAGING"
-              ? {
-                promoted_object: {
-                  page_id: pageId,
-                },
-              }
-              : metaDestinationType === "APP" && metaAppStoreIdentity.valid
                 ? {
                   promoted_object: {
-                    application_id: metaAppId.trim(),
-                    object_store_url: metaAppStoreIdentity.url,
+                    page_id: pageId,
                   },
                 }
-                : metaCustomConversionId.trim()
+                : metaDestinationType === "APP" && metaAppStoreIdentity.valid
                   ? {
                     promoted_object: {
-                      custom_conversion_id: metaCustomConversionId.trim(),
+                      application_id: metaAppId.trim(),
+                      object_store_url: metaAppStoreIdentity.url,
                     },
                   }
-                  : hasRealPixel
+                  : metaCustomConversionId.trim()
                     ? {
                       promoted_object: {
-                        pixel_id: metaPixel,
-                        ...(metaConversionEventValue && {
-                          custom_event_type: metaConversionEventValue,
-                        }),
+                        custom_conversion_id: metaCustomConversionId.trim(),
                       },
                     }
-                    : {}),
+                    : hasRealPixel
+                      ? {
+                        promoted_object: {
+                          pixel_id: metaPixel,
+                          ...(metaConversionEventValue && {
+                            custom_event_type: metaConversionEventValue,
+                          }),
+                        },
+                      }
+                      : {}),
           },
 
           ad: {
@@ -9623,7 +9639,9 @@ useEffect(() => {
       execution: {
         validateOnly: executionMode === "VALIDATE_ONLY",
         confirm: executionMode === "LIVE",
-        metaValidateCampaign: executionMode === "VALIDATE_ONLY"
+        // Catalog DPA Validate Only performs Meta's native Campaign validate_only
+        // request. Ad Set, Creative and Ad validation remains local-only.
+        metaValidateCampaign: executionMode === "VALIDATE_ONLY" && isMetaCatalogLiveTest,
       },
     };
   };
@@ -11868,75 +11886,74 @@ useEffect(() => {
       setError("Unable to copy the request. Please copy it manually.");
     }
   };
-  
-const handleRegisterGoogleMerchantCenter = async () => {
-  if (!googleMerchantCenterId) {
-    setGoogleMerchantRegistrationError(
-      "Select a linked Merchant Center account first.",
-    );
-    return;
-  }
 
-  setGoogleMerchantRegistrationLoading(true);
-  setGoogleMerchantRegistrationError("");
-  setGoogleMerchantRegistrationSuccess("");
-
-  try {
-    const token = await getToken();
-
-    if (!token) {
-      throw new Error(
-        "Unable to retrieve your Clerk authentication token.",
+  const handleRegisterGoogleMerchantCenter = async () => {
+    if (!googleMerchantCenterId) {
+      setGoogleMerchantRegistrationError(
+        "Select a linked Merchant Center account first.",
       );
+      return;
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/api/campaigns/lookups/google/merchant-center/register-gcp`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
+    setGoogleMerchantRegistrationLoading(true);
+    setGoogleMerchantRegistrationError("");
+    setGoogleMerchantRegistrationSuccess("");
+
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error(
+          "Unable to retrieve your Clerk authentication token.",
+        );
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/campaigns/lookups/google/merchant-center/register-gcp`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            merchantCenterId: googleMerchantCenterId,
+            developerEmail:
+              googleMerchantDeveloperEmail.trim() || undefined,
+          }),
+          cache: "no-store",
         },
-        body: JSON.stringify({
-          merchantCenterId: googleMerchantCenterId,
-          developerEmail:
-            googleMerchantDeveloperEmail.trim() || undefined,
-        }),
-        cache: "no-store",
-      },
-    );
-
-    const payload = await response.json().catch(() => null);
-
-    if (!response.ok || payload?.success !== true) {
-      throw new Error(
-        payload?.message ||
-          `Merchant Center registration failed (${response.status}).`,
       );
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || payload?.success !== true) {
+        throw new Error(
+          payload?.message ||
+          `Merchant Center registration failed (${response.status}).`,
+        );
+      }
+
+      const registration = payload.data?.registration;
+      const gcpIds = Array.isArray(registration?.gcpIds)
+        ? registration.gcpIds
+        : [];
+
+      setGoogleMerchantRegistrationSuccess(
+        `Google Cloud project registered successfully.${gcpIds.length ? ` GCP ID: ${gcpIds.join(", ")}` : ""
+        }`,
+      );
+    } catch (error) {
+      setGoogleMerchantRegistrationError(
+        error instanceof Error
+          ? error.message
+          : "Unable to register the Google Cloud project.",
+      );
+    } finally {
+      setGoogleMerchantRegistrationLoading(false);
     }
-
-    const registration = payload.data?.registration;
-    const gcpIds = Array.isArray(registration?.gcpIds)
-      ? registration.gcpIds
-      : [];
-
-    setGoogleMerchantRegistrationSuccess(
-      `Google Cloud project registered successfully.${
-        gcpIds.length ? ` GCP ID: ${gcpIds.join(", ")}` : ""
-      }`,
-    );
-  } catch (error) {
-    setGoogleMerchantRegistrationError(
-      error instanceof Error
-        ? error.message
-        : "Unable to register the Google Cloud project.",
-    );
-  } finally {
-    setGoogleMerchantRegistrationLoading(false);
-  }
-};
+  };
 
   return (
     <div className="flex flex-col p-2">
@@ -12771,192 +12788,192 @@ const handleRegisterGoogleMerchantCenter = async () => {
                         <option value="2">High (2)</option>
                       </select>
                     </div>
-                    
-<div>
-  <label className={labelClass}>
-    Feed Label and Language
-  </label>
 
-  <select
-    value={
-      googleShoppingFeedLabel && googleShoppingContentLanguage
-        ? `${googleShoppingFeedLabel}|||${googleShoppingContentLanguage}`
-        : ""
-    }
-    onChange={(e) => {
-      const [feedLabel, contentLanguage] =
-        e.target.value.split("|||", 2);
+                    <div>
+                      <label className={labelClass}>
+                        Feed Label and Language
+                      </label>
 
-      setGoogleShoppingFeedLabel(feedLabel ?? "");
-      setGoogleShoppingContentLanguage(contentLanguage ?? "");
-      clearPreview();
-    }}
-    className={inputClass}
-    disabled={
-      googleMerchantCenterFeedLabelsLoading ||
-      googleMerchantCenterFeedLabels.length === 0
-    }
-  >
-    <option value="">
-      {googleMerchantCenterFeedLabelsLoading
-        ? "Loading feed labels..."
-        : "No feed label selected"}
-    </option>
+                      <select
+                        value={
+                          googleShoppingFeedLabel && googleShoppingContentLanguage
+                            ? `${googleShoppingFeedLabel}|||${googleShoppingContentLanguage}`
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const [feedLabel, contentLanguage] =
+                            e.target.value.split("|||", 2);
 
-    {googleMerchantCenterFeedLabels.map((item) => (
-      <option
-        key={`${item.feedLabel}-${item.contentLanguage}`}
-        value={`${item.feedLabel}|||${item.contentLanguage}`}
-      >
-        {item.feedLabel} · {item.contentLanguage.toUpperCase()}
-      </option>
-    ))}
-  </select>
+                          setGoogleShoppingFeedLabel(feedLabel ?? "");
+                          setGoogleShoppingContentLanguage(contentLanguage ?? "");
+                          clearPreview();
+                        }}
+                        className={inputClass}
+                        disabled={
+                          googleMerchantCenterFeedLabelsLoading ||
+                          googleMerchantCenterFeedLabels.length === 0
+                        }
+                      >
+                        <option value="">
+                          {googleMerchantCenterFeedLabelsLoading
+                            ? "Loading feed labels..."
+                            : "No feed label selected"}
+                        </option>
 
-  {googleMerchantCenterFeedLabelsError && (
-    <p className="mt-1 text-xs text-amber-700">
-      {googleMerchantCenterFeedLabelsError}
-    </p>
-  )}
-</div>
+                        {googleMerchantCenterFeedLabels.map((item) => (
+                          <option
+                            key={`${item.feedLabel}-${item.contentLanguage}`}
+                            value={`${item.feedLabel}|||${item.contentLanguage}`}
+                          >
+                            {item.feedLabel} · {item.contentLanguage.toUpperCase()}
+                          </option>
+                        ))}
+                      </select>
 
-<div className="sm:col-span-2 rounded-lg border border-slate-200 p-3">
-  <div className="flex flex-wrap items-center justify-between gap-2">
-    <p className="text-sm font-semibold text-slate-800">
-      Merchant Center Data Sources
-    </p>
-    <span className="text-xs text-slate-500">
-      {googleMerchantCenterDataSourcesLoading
-        ? "Loading..."
-        : `${googleMerchantCenterDataSources.length} found`}
-    </span>
-  </div>
+                      {googleMerchantCenterFeedLabelsError && (
+                        <p className="mt-1 text-xs text-amber-700">
+                          {googleMerchantCenterFeedLabelsError}
+                        </p>
+                      )}
+                    </div>
 
-  {googleMerchantCenterDataSourcesError ? (
-    <p className="mt-2 text-xs text-red-600">
-      {googleMerchantCenterDataSourcesError}
-    </p>
-  ) : (
-    <div className="mt-2 space-y-2">
-      {googleMerchantCenterDataSources.map((source, index) => (
-        <div
-          key={source.dataSourceId ?? source.name ?? index}
-          className="rounded-md bg-slate-50 p-2 text-xs"
-        >
-          <p className="font-medium text-slate-800">
-            {source.displayName || source.dataSourceId || source.name}
-          </p>
-          <p className="text-slate-500">
-            {source.type || "Data source"}
-            {source.feedLabel ? ` · ${source.feedLabel}` : ""}
-            {source.contentLanguage
-              ? ` · ${source.contentLanguage.toUpperCase()}`
-              : ""}
-          </p>
-        </div>
-      ))}
-    </div>
-  )}
+                    <div className="sm:col-span-2 rounded-lg border border-slate-200 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-semibold text-slate-800">
+                          Merchant Center Data Sources
+                        </p>
+                        <span className="text-xs text-slate-500">
+                          {googleMerchantCenterDataSourcesLoading
+                            ? "Loading..."
+                            : `${googleMerchantCenterDataSources.length} found`}
+                        </span>
+                      </div>
 
-  <div className="mt-4 border-t border-slate-200 pt-3">
-    <div className="flex justify-between gap-2">
-      <p className="text-sm font-semibold text-slate-800">
-        Merchant Center Products
-      </p>
-      <span className="text-xs text-slate-500">
-        {googleMerchantCenterProductsLoading
-          ? "Loading..."
-          : `${googleMerchantCenterProducts.length} loaded`}
-      </span>
-    </div>
+                      {googleMerchantCenterDataSourcesError ? (
+                        <p className="mt-2 text-xs text-red-600">
+                          {googleMerchantCenterDataSourcesError}
+                        </p>
+                      ) : (
+                        <div className="mt-2 space-y-2">
+                          {googleMerchantCenterDataSources.map((source, index) => (
+                            <div
+                              key={source.dataSourceId ?? source.name ?? index}
+                              className="rounded-md bg-slate-50 p-2 text-xs"
+                            >
+                              <p className="font-medium text-slate-800">
+                                {source.displayName || source.dataSourceId || source.name}
+                              </p>
+                              <p className="text-slate-500">
+                                {source.type || "Data source"}
+                                {source.feedLabel ? ` · ${source.feedLabel}` : ""}
+                                {source.contentLanguage
+                                  ? ` · ${source.contentLanguage.toUpperCase()}`
+                                  : ""}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-    {googleMerchantCenterProductsError ? (
-      <p className="mt-2 text-xs text-amber-700">
-        {googleMerchantCenterProductsError}
-      </p>
-    ) : googleMerchantCenterProducts.length > 0 ? (
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
-        {googleMerchantCenterProducts.slice(0, 6).map((product, index) => (
-          <div
-            key={product.id ?? product.offerId ?? index}
-            className="rounded-md border border-slate-100 p-2"
-          >
-            <p className="text-xs font-medium text-slate-800">
-              {product.title || product.offerId || product.id}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {[product.brand, product.offerId, product.availability]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p className="mt-2 text-xs text-slate-500">
-        {googleMerchantCenterProductsLoading
-          ? "Retrieving products..."
-          : "No products returned for the selected feed label and language."}
-      </p>
-    )}
-  </div>
-</div>
+                      <div className="mt-4 border-t border-slate-200 pt-3">
+                        <div className="flex justify-between gap-2">
+                          <p className="text-sm font-semibold text-slate-800">
+                            Merchant Center Products
+                          </p>
+                          <span className="text-xs text-slate-500">
+                            {googleMerchantCenterProductsLoading
+                              ? "Loading..."
+                              : `${googleMerchantCenterProducts.length} loaded`}
+                          </span>
+                        </div>
 
-<div className="mt-3 rounded-lg border border-slate-200 p-4 space-y-3">
-  <div>
-    <p className="text-sm font-semibold text-slate-800">
-      Merchant API Developer Registration
-    </p>
-    <p className="mt-1 text-xs text-slate-500">
-      One-time setup to register the AdSyntra Google Cloud project
-      with the selected Merchant Center account.
-    </p>
-  </div>
+                        {googleMerchantCenterProductsError ? (
+                          <p className="mt-2 text-xs text-amber-700">
+                            {googleMerchantCenterProductsError}
+                          </p>
+                        ) : googleMerchantCenterProducts.length > 0 ? (
+                          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                            {googleMerchantCenterProducts.slice(0, 6).map((product, index) => (
+                              <div
+                                key={product.id ?? product.offerId ?? index}
+                                className="rounded-md border border-slate-100 p-2"
+                              >
+                                <p className="text-xs font-medium text-slate-800">
+                                  {product.title || product.offerId || product.id}
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                  {[product.brand, product.offerId, product.availability]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-slate-500">
+                            {googleMerchantCenterProductsLoading
+                              ? "Retrieving products..."
+                              : "No products returned for the selected feed label and language."}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-  <div>
-    <label className={labelClass}>
-      Developer Contact Email (Google Account)
-    </label>
-    <input
-      type="email"
-      value={googleMerchantDeveloperEmail}
-      onChange={(e) =>
-        setGoogleMerchantDeveloperEmail(e.target.value)
-      }
-      placeholder="developer@example.com"
-      className={inputClass}
-    />
-    <p className="mt-1 text-xs text-slate-500">
-      Optional in Google's API. Recommended for technical notifications.
-    </p>
-  </div>
+                    <div className="mt-3 rounded-lg border border-slate-200 p-4 space-y-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">
+                          Merchant API Developer Registration
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          One-time setup to register the AdSyntra Google Cloud project
+                          with the selected Merchant Center account.
+                        </p>
+                      </div>
 
-  <button
-    type="button"
-    onClick={handleRegisterGoogleMerchantCenter}
-    disabled={
-      googleMerchantRegistrationLoading ||
-      !googleMerchantCenterId
-    }
-    className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-  >
-    {googleMerchantRegistrationLoading
-      ? "Registering..."
-      : "Register Google Cloud Project"}
-  </button>
+                      <div>
+                        <label className={labelClass}>
+                          Developer Contact Email (Google Account)
+                        </label>
+                        <input
+                          type="email"
+                          value={googleMerchantDeveloperEmail}
+                          onChange={(e) =>
+                            setGoogleMerchantDeveloperEmail(e.target.value)
+                          }
+                          placeholder="developer@example.com"
+                          className={inputClass}
+                        />
+                        <p className="mt-1 text-xs text-slate-500">
+                          Optional in Google's API. Recommended for technical notifications.
+                        </p>
+                      </div>
 
-  {googleMerchantRegistrationError && (
-    <p className="text-xs text-red-600">
-      {googleMerchantRegistrationError}
-    </p>
-  )}
+                      <button
+                        type="button"
+                        onClick={handleRegisterGoogleMerchantCenter}
+                        disabled={
+                          googleMerchantRegistrationLoading ||
+                          !googleMerchantCenterId
+                        }
+                        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                      >
+                        {googleMerchantRegistrationLoading
+                          ? "Registering..."
+                          : "Register Google Cloud Project"}
+                      </button>
 
-  {googleMerchantRegistrationSuccess && (
-    <p className="text-xs text-emerald-700">
-      {googleMerchantRegistrationSuccess}
-    </p>
-  )}
-</div>
+                      {googleMerchantRegistrationError && (
+                        <p className="text-xs text-red-600">
+                          {googleMerchantRegistrationError}
+                        </p>
+                      )}
+
+                      {googleMerchantRegistrationSuccess && (
+                        <p className="text-xs text-emerald-700">
+                          {googleMerchantRegistrationSuccess}
+                        </p>
+                      )}
+                    </div>
 
 
                     <div>
@@ -12992,36 +13009,36 @@ const handleRegisterGoogleMerchantCenter = async () => {
                           className={inputClass}
                         />
                       </div> */}
-                    
+
                     {googleShoppingProductGroupType === "ITEM_ID" &&
-googleMerchantCenterProducts.length > 0 ? (
-  <select
-    value={googleShoppingProductGroupValue}
-    onChange={(e) => {
-      setGoogleShoppingProductGroupValue(e.target.value);
-      clearPreview();
-    }}
-    className={inputClass}
-  >
-    <option value="">Select a Merchant Center product</option>
-    {googleMerchantCenterProducts
-      .filter((product) => product.offerId)
-      .map((product) => (
-        <option key={product.id ?? product.offerId} value={product.offerId}>
-          {product.title || product.offerId} · {product.offerId}
-        </option>
-      ))}
-  </select>
-) : (
-  <input
-    value={googleShoppingProductGroupValue}
-    onChange={(e) => {
-      setGoogleShoppingProductGroupValue(e.target.value);
-      clearPreview();
-    }}
-    className={inputClass}
-  />
-)}
+                      googleMerchantCenterProducts.length > 0 ? (
+                      <select
+                        value={googleShoppingProductGroupValue}
+                        onChange={(e) => {
+                          setGoogleShoppingProductGroupValue(e.target.value);
+                          clearPreview();
+                        }}
+                        className={inputClass}
+                      >
+                        <option value="">Select a Merchant Center product</option>
+                        {googleMerchantCenterProducts
+                          .filter((product) => product.offerId)
+                          .map((product) => (
+                            <option key={product.id ?? product.offerId} value={product.offerId}>
+                              {product.title || product.offerId} · {product.offerId}
+                            </option>
+                          ))}
+                      </select>
+                    ) : (
+                      <input
+                        value={googleShoppingProductGroupValue}
+                        onChange={(e) => {
+                          setGoogleShoppingProductGroupValue(e.target.value);
+                          clearPreview();
+                        }}
+                        className={inputClass}
+                      />
+                    )}
                     <p className="sm:col-span-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">
                       Standard Shopping requires a linked Merchant Center
                       account and shopping_setting. The API adapter must create
@@ -13262,11 +13279,10 @@ googleMerchantCenterProducts.length > 0 ? (
                       />
                       {googleAppId.trim() && (
                         <p
-                          className={`mt-2 text-xs ${
-                            googleAppIdentityValidation.valid
+                          className={`mt-2 text-xs ${googleAppIdentityValidation.valid
                               ? "text-emerald-700"
                               : "text-red-600"
-                          }`}
+                            }`}
                         >
                           {googleAppIdentityValidation.valid
                             ? `Identifier format is valid. Google Ads app ID: ${googleAppIdentityValidation.normalizedAppId}`
@@ -13398,134 +13414,134 @@ googleMerchantCenterProducts.length > 0 ? (
                         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
                           Locations
                         </Typography>
-                          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                            <Typography variant="caption" color="text.secondary">Targeting mode</Typography>
-                            <Button
-                              size="small"
-                              variant={googleLocationTargetMode === "INCLUDE" ? "contained" : "outlined"}
-                              color="primary"
-                              onClick={() => setGoogleLocationTargetMode("INCLUDE")}
-                              sx={{ textTransform: "none", borderRadius: 1.5, minWidth: 86 }}
-                            >
-                              Include
-                            </Button>
-                            <Button
-                              size="small"
-                              variant={googleLocationTargetMode === "EXCLUDE" ? "contained" : "outlined"}
-                              color="error"
-                              onClick={() => setGoogleLocationTargetMode("EXCLUDE")}
-                              sx={{ textTransform: "none", borderRadius: 1.5, minWidth: 86 }}
-                            >
-                              Exclude
-                            </Button>
-                          </Stack>
-<Box ref={locationAnchorRef}>
-  <TextField
-    fullWidth
-    size="small"
-    value={googleLocationQuery}
-    onChange={(e) => {
-      setGoogleLocationQuery(e.target.value);
-      setLocationOpen(true);
-      setGoogleLocationOptionsOpen(true);
-    }}
-    onFocus={() => {
-      setLocationOpen(true);
-      setGoogleLocationOptionsOpen(true);
-    }}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        void handleGoogleLocationSearch();
-      }
-    }}
-    placeholder={geoResources.length + excludedGeoResources.length === 0 ? "Search city, state or country" : ""}
-    InputProps={{
-      startAdornment: geoResources.length + excludedGeoResources.length > 0 ? (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-          {geoResources.map((resourceName) => {
-            const matchingOption = googleLocationOptions.find(
-              (opt) => getGoogleLookupResourceName(opt, "geoTargetConstants") === resourceName
-            );
-            const label = matchingOption ? getGoogleLookupLabel(matchingOption) : resourceName;
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                          <Typography variant="caption" color="text.secondary">Targeting mode</Typography>
+                          <Button
+                            size="small"
+                            variant={googleLocationTargetMode === "INCLUDE" ? "contained" : "outlined"}
+                            color="primary"
+                            onClick={() => setGoogleLocationTargetMode("INCLUDE")}
+                            sx={{ textTransform: "none", borderRadius: 1.5, minWidth: 86 }}
+                          >
+                            Include
+                          </Button>
+                          <Button
+                            size="small"
+                            variant={googleLocationTargetMode === "EXCLUDE" ? "contained" : "outlined"}
+                            color="error"
+                            onClick={() => setGoogleLocationTargetMode("EXCLUDE")}
+                            sx={{ textTransform: "none", borderRadius: 1.5, minWidth: 86 }}
+                          >
+                            Exclude
+                          </Button>
+                        </Stack>
+                        <Box ref={locationAnchorRef}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            value={googleLocationQuery}
+                            onChange={(e) => {
+                              setGoogleLocationQuery(e.target.value);
+                              setLocationOpen(true);
+                              setGoogleLocationOptionsOpen(true);
+                            }}
+                            onFocus={() => {
+                              setLocationOpen(true);
+                              setGoogleLocationOptionsOpen(true);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                void handleGoogleLocationSearch();
+                              }
+                            }}
+                            placeholder={geoResources.length + excludedGeoResources.length === 0 ? "Search city, state or country" : ""}
+                            InputProps={{
+                              startAdornment: geoResources.length + excludedGeoResources.length > 0 ? (
+                                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                                  {geoResources.map((resourceName) => {
+                                    const matchingOption = googleLocationOptions.find(
+                                      (opt) => getGoogleLookupResourceName(opt, "geoTargetConstants") === resourceName
+                                    );
+                                    const label = matchingOption ? getGoogleLookupLabel(matchingOption) : resourceName;
 
-            return (
-              <Chip
-                key={`included-${resourceName}`}
-                label={`Include: ${label}`}
-                size="small"
-                color="primary"
-                variant="outlined"
-                onDelete={() => {
-                  setGoogleGeoTargetResources((current) =>
-                    toggleGoogleResourceName(current, resourceName, false)
-                  );
-                  clearPreview();
-                }}
-              />
-            );
-          })}
-          {excludedGeoResources.map((resourceName) => {
-            const matchingOption = googleLocationOptions.find(
-              (opt) => getGoogleLookupResourceName(opt, "geoTargetConstants") === resourceName
-            );
-            const label = matchingOption ? getGoogleLookupLabel(matchingOption) : resourceName;
+                                    return (
+                                      <Chip
+                                        key={`included-${resourceName}`}
+                                        label={`Include: ${label}`}
+                                        size="small"
+                                        color="primary"
+                                        variant="outlined"
+                                        onDelete={() => {
+                                          setGoogleGeoTargetResources((current) =>
+                                            toggleGoogleResourceName(current, resourceName, false)
+                                          );
+                                          clearPreview();
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                  {excludedGeoResources.map((resourceName) => {
+                                    const matchingOption = googleLocationOptions.find(
+                                      (opt) => getGoogleLookupResourceName(opt, "geoTargetConstants") === resourceName
+                                    );
+                                    const label = matchingOption ? getGoogleLookupLabel(matchingOption) : resourceName;
 
-            return (
-              <Chip
-                key={`excluded-${resourceName}`}
-                label={`Exclude: ${label}`}
-                size="small"
-                color="error"
-                variant="outlined"
-                onDelete={() => {
-                  setGoogleExcludedGeoTargetResources((current) =>
-                    toggleGoogleResourceName(current, resourceName, false)
-                  );
-                  clearPreview();
-                }}
-              />
-            );
-          })}
-        </Box>
-      ) : null,
-      endAdornment: (
-        <InputAdornment position="end">
-          <IconButton
-            onClick={() => {
-              setLocationOpen(true);
-              setGoogleLocationOptionsOpen(true);
-              void handleGoogleLocationSearch();
-            }}
-            disabled={googleLocationLoading}
-            edge="end"
-            aria-label="Search locations"
-            size="small"
-          >
-            {googleLocationLoading ? (
-              <CircularProgress size={19} />
-            ) : (
-              <SearchIcon />
-            )}
-          </IconButton>
-        </InputAdornment>
-      ),
-    }}
-    sx={{
-      "& .MuiOutlinedInput-root": {
-        borderRadius: 2,
-        backgroundColor: "background.paper",
-        flexWrap: "wrap", // Allows the box to grow downwards
-        paddingY: geoResources.length + excludedGeoResources.length > 0 ? "6px" : undefined,
-      },
-      "& .MuiOutlinedInput-input": {
-        flex: 1, // Input takes remaining space on the line
-        minWidth: "100px", // Prevents input from being squished
-        padding: geoResources.length + excludedGeoResources.length > 0 ? "4px 0" : undefined,
-      },
-    }}
-  />
-</Box>
+                                    return (
+                                      <Chip
+                                        key={`excluded-${resourceName}`}
+                                        label={`Exclude: ${label}`}
+                                        size="small"
+                                        color="error"
+                                        variant="outlined"
+                                        onDelete={() => {
+                                          setGoogleExcludedGeoTargetResources((current) =>
+                                            toggleGoogleResourceName(current, resourceName, false)
+                                          );
+                                          clearPreview();
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                </Box>
+                              ) : null,
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    onClick={() => {
+                                      setLocationOpen(true);
+                                      setGoogleLocationOptionsOpen(true);
+                                      void handleGoogleLocationSearch();
+                                    }}
+                                    disabled={googleLocationLoading}
+                                    edge="end"
+                                    aria-label="Search locations"
+                                    size="small"
+                                  >
+                                    {googleLocationLoading ? (
+                                      <CircularProgress size={19} />
+                                    ) : (
+                                      <SearchIcon />
+                                    )}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: 2,
+                                backgroundColor: "background.paper",
+                                flexWrap: "wrap", // Allows the box to grow downwards
+                                paddingY: geoResources.length + excludedGeoResources.length > 0 ? "6px" : undefined,
+                              },
+                              "& .MuiOutlinedInput-input": {
+                                flex: 1, // Input takes remaining space on the line
+                                minWidth: "100px", // Prevents input from being squished
+                                padding: geoResources.length + excludedGeoResources.length > 0 ? "4px 0" : undefined,
+                              },
+                            }}
+                          />
+                        </Box>
                         {googleLocationError && (
                           <Typography
                             color="error"
@@ -13859,142 +13875,142 @@ googleMerchantCenterProducts.length > 0 ? (
 
                       {supportsGoogleLanguageTargeting ? (
                         <>
-                      {/* ================= LANGUAGES ================= */}
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                          Languages
-                        </Typography>
+                          {/* ================= LANGUAGES ================= */}
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                              Languages
+                            </Typography>
 
-                        <Autocomplete
-                          multiple
-                          openOnFocus
-                          disableCloseOnSelect
-                          options={googleLanguageOptions}
-                          loading={googleLanguageLoading}
-                          value={googleLanguageResources.filter((selectedOption) => {
-                            const selectedResourceName = getGoogleLookupResourceName(
-                              selectedOption,
-                              "languageConstants",
-                            );
-                            return Boolean(
-                              selectedResourceName &&
-                              googleLanguageOptions.some(
-                                (option) =>
-                                  getGoogleLookupResourceName(option, "languageConstants") ===
-                                  selectedResourceName,
-                              ),
-                            );
-                          })}
-                          inputValue={googleLanguageSearch}
-                          onInputChange={(_, value) => setGoogleLanguageSearch(value)}
-                          onChange={(_, selectedOptions) => {
-                            setGoogleLanguageResources(selectedOptions);
-                            clearPreview();
-                          }}
-                          getOptionLabel={(option) => getGoogleLookupLabel(option)}
-                          isOptionEqualToValue={(option, value) =>
-                            getGoogleLookupResourceName(option, "languageConstants") ===
-                            getGoogleLookupResourceName(value, "languageConstants")
-                          }
-                          filterOptions={(options, { inputValue }) => {
-                            const search = inputValue.trim().toLowerCase();
-                            return options.filter((option) => {
-                              const searchText = [
-                                getGoogleLookupLabel(option),
-                                option.id,
-                                option.resourceName,
-                                option.resource_name,
-                              ]
-                                .join(" ")
-                                .toLowerCase();
-                              return searchText.includes(search);
-                            });
-                          }}
-                          noOptionsText="No languages found"
-                          loadingText="Loading Google Ads languages..."
-                          ListboxProps={{ style: { maxHeight: 240 } }}
-                          renderOption={(props, option, { selected }) => {
-                            const resourceName = getGoogleLookupResourceName(
-                              option,
-                              "languageConstants"
-                            );
-                            return (
-                              <Box
-                                component="li"
-                                {...props}
-                                key={resourceName || getGoogleLookupLabel(option)}
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                  py: 1,
-                                }}
-                              >
-                                <Checkbox size="small" checked={selected} sx={{ p: 0.5 }} />
-                                <Box sx={{ minWidth: 0 }}>
-                                  <Typography variant="body2" fontWeight={500}>
-                                    {getGoogleLookupLabel(option)}
-                                  </Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    sx={{ overflowWrap: "anywhere" }}
-                                  >
-                                    {resourceName}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            );
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              size="small"
-                              placeholder={
-                                languageResources.length > 0
-                                  ? "Search or add languages"
-                                  : "Click to select languages"
+                            <Autocomplete
+                              multiple
+                              openOnFocus
+                              disableCloseOnSelect
+                              options={googleLanguageOptions}
+                              loading={googleLanguageLoading}
+                              value={googleLanguageResources.filter((selectedOption) => {
+                                const selectedResourceName = getGoogleLookupResourceName(
+                                  selectedOption,
+                                  "languageConstants",
+                                );
+                                return Boolean(
+                                  selectedResourceName &&
+                                  googleLanguageOptions.some(
+                                    (option) =>
+                                      getGoogleLookupResourceName(option, "languageConstants") ===
+                                      selectedResourceName,
+                                  ),
+                                );
+                              })}
+                              inputValue={googleLanguageSearch}
+                              onInputChange={(_, value) => setGoogleLanguageSearch(value)}
+                              onChange={(_, selectedOptions) => {
+                                setGoogleLanguageResources(selectedOptions);
+                                clearPreview();
+                              }}
+                              getOptionLabel={(option) => getGoogleLookupLabel(option)}
+                              isOptionEqualToValue={(option, value) =>
+                                getGoogleLookupResourceName(option, "languageConstants") ===
+                                getGoogleLookupResourceName(value, "languageConstants")
                               }
-                              error={Boolean(googleLanguageError)}
-                              helperText={googleLanguageError || undefined}
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <>
-                                    {googleLanguageLoading && (
-                                      <CircularProgress color="inherit" size={18} />
-                                    )}
-                                    {params?.InputProps?.endAdornment}
-                                  </>
-                                ),
+                              filterOptions={(options, { inputValue }) => {
+                                const search = inputValue.trim().toLowerCase();
+                                return options.filter((option) => {
+                                  const searchText = [
+                                    getGoogleLookupLabel(option),
+                                    option.id,
+                                    option.resourceName,
+                                    option.resource_name,
+                                  ]
+                                    .join(" ")
+                                    .toLowerCase();
+                                  return searchText.includes(search);
+                                });
+                              }}
+                              noOptionsText="No languages found"
+                              loadingText="Loading Google Ads languages..."
+                              ListboxProps={{ style: { maxHeight: 240 } }}
+                              renderOption={(props, option, { selected }) => {
+                                const resourceName = getGoogleLookupResourceName(
+                                  option,
+                                  "languageConstants"
+                                );
+                                return (
+                                  <Box
+                                    component="li"
+                                    {...props}
+                                    key={resourceName || getGoogleLookupLabel(option)}
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                      py: 1,
+                                    }}
+                                  >
+                                    <Checkbox size="small" checked={selected} sx={{ p: 0.5 }} />
+                                    <Box sx={{ minWidth: 0 }}>
+                                      <Typography variant="body2" fontWeight={500}>
+                                        {getGoogleLookupLabel(option)}
+                                      </Typography>
+                                      <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{ overflowWrap: "anywhere" }}
+                                      >
+                                        {resourceName}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                );
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  size="small"
+                                  placeholder={
+                                    languageResources.length > 0
+                                      ? "Search or add languages"
+                                      : "Click to select languages"
+                                  }
+                                  error={Boolean(googleLanguageError)}
+                                  helperText={googleLanguageError || undefined}
+                                  InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {googleLanguageLoading && (
+                                          <CircularProgress color="inherit" size={18} />
+                                        )}
+                                        {params?.InputProps?.endAdornment}
+                                      </>
+                                    ),
+                                  }}
+                                />
+                              )}
+                              sx={{
+                                "& .MuiAutocomplete-tag": { maxWidth: "calc(100% - 16px)" },
+                                "& .MuiOutlinedInput-root": { borderRadius: 2 },
                               }}
                             />
-                          )}
-                          sx={{
-                            "& .MuiAutocomplete-tag": { maxWidth: "calc(100% - 16px)" },
-                            "& .MuiOutlinedInput-root": { borderRadius: 2 },
-                          }}
-                        />
 
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                          spacing={1}
-                          sx={{ mt: 1.5 }}
-                        >
-                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 0 }}>
-                            Select the languages you want to target.
-                          </Typography>
-                          <Chip
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                            label={`${languageResources.length} selected`}
-                            sx={{ flexShrink: 0 }}
-                          />
-                        </Stack>
-                      </Box>
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="space-between"
+                              spacing={1}
+                              sx={{ mt: 1.5 }}
+                            >
+                              <Typography variant="caption" color="text.secondary" sx={{ minWidth: 0 }}>
+                                Select the languages you want to target.
+                              </Typography>
+                              <Chip
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                                label={`${languageResources.length} selected`}
+                                sx={{ flexShrink: 0 }}
+                              />
+                            </Stack>
+                          </Box>
                         </>
                       ) : googleCampaignType === "SEARCH" ? (
                         <Alert severity="info" sx={{ mt: 1 }}>
@@ -14604,171 +14620,169 @@ googleMerchantCenterProducts.length > 0 ? (
                         <p className="mt-1 text-xs text-slate-500">Selecting a saved audience copies supported location, age, gender and interest criteria into this draft. Review the values before publishing.</p>
                       </div>
 
-<Box
-  sx={{
-    border: 1,
-    borderColor: "divider",
-    borderRadius: 2,
-    p: 2.5,
-    bgcolor: "background.paper",
-    boxShadow: 1,
-  }}
->
-  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-    <LanguageIcon color="primary" fontSize="small" />
-    <Typography variant="subtitle2" fontWeight={600}>
-      Target Meta Locations
-    </Typography>
-  </Stack>
+                      <Box
+                        sx={{
+                          border: 1,
+                          borderColor: "divider",
+                          borderRadius: 2,
+                          p: 2.5,
+                          bgcolor: "background.paper",
+                          boxShadow: 1,
+                        }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                          <LanguageIcon color="primary" fontSize="small" />
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            Target Meta Locations
+                          </Typography>
+                        </Stack>
 
-  <div className="mb-3 flex flex-wrap items-center gap-2">
-    <span className="text-xs font-semibold text-slate-600">Apply searched locations as:</span>
-    <button
-      type="button"
-      onClick={() => { setMetaSelectedLocationOptions([]); setMetaLocationTargetMode("INCLUDE"); }}
-      className={`rounded-lg border px-3 py-2 text-xs font-semibold ${
-        metaLocationTargetMode === "INCLUDE"
-          ? "border-blue-600 bg-blue-50 text-blue-700"
-          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-      }`}
-    >
-      Include locations
-    </button>
-    <button
-      type="button"
-      onClick={() => { setMetaSelectedLocationOptions([]); setMetaLocationTargetMode("EXCLUDE"); }}
-      className={`rounded-lg border px-3 py-2 text-xs font-semibold ${
-        metaLocationTargetMode === "EXCLUDE"
-          ? "border-rose-600 bg-rose-50 text-rose-700"
-          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-      }`}
-    >
-      Exclude locations
-    </button>
-  </div>
+                        <div className="mb-3 flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-semibold text-slate-600">Apply searched locations as:</span>
+                          <button
+                            type="button"
+                            onClick={() => { setMetaSelectedLocationOptions([]); setMetaLocationTargetMode("INCLUDE"); }}
+                            className={`rounded-lg border px-3 py-2 text-xs font-semibold ${metaLocationTargetMode === "INCLUDE"
+                                ? "border-blue-600 bg-blue-50 text-blue-700"
+                                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                              }`}
+                          >
+                            Include locations
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setMetaSelectedLocationOptions([]); setMetaLocationTargetMode("EXCLUDE"); }}
+                            className={`rounded-lg border px-3 py-2 text-xs font-semibold ${metaLocationTargetMode === "EXCLUDE"
+                                ? "border-rose-600 bg-rose-50 text-rose-700"
+                                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                              }`}
+                          >
+                            Exclude locations
+                          </button>
+                        </div>
 
-  <p className="mb-3 text-xs text-slate-500">
-    Search results are added to the selected include or exclude list. Included and excluded locations can contain countries, regions, cities and ZIP codes together.
-  </p>
+                        <p className="mb-3 text-xs text-slate-500">
+                          Search results are added to the selected include or exclude list. Included and excluded locations can contain countries, regions, cities and ZIP codes together.
+                        </p>
 
-  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-    {/* 1. Location Type Select */}
-    <TextField
-      select
-      size="small"
-      value={metaLocationKind}
-      onChange={(event) => {
-        setMetaLocationKind(event.target.value as "country" | "region" | "city" | "zip");
-        setMetaLocationOptions([]);
-        setMetaSelectedLocationOptions([]);
-        setMetaLocationError("");
-      }}
-      sx={{ minWidth: 140 }}
-    >
-      <MenuItem value="country">Country</MenuItem>
-      <MenuItem value="region">Region</MenuItem>
-      <MenuItem value="city">City</MenuItem>
-      <MenuItem value="zip">ZIP / Postal</MenuItem>
-    </TextField>
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                          {/* 1. Location Type Select */}
+                          <TextField
+                            select
+                            size="small"
+                            value={metaLocationKind}
+                            onChange={(event) => {
+                              setMetaLocationKind(event.target.value as "country" | "region" | "city" | "zip");
+                              setMetaLocationOptions([]);
+                              setMetaSelectedLocationOptions([]);
+                              setMetaLocationError("");
+                            }}
+                            sx={{ minWidth: 140 }}
+                          >
+                            <MenuItem value="country">Country</MenuItem>
+                            <MenuItem value="region">Region</MenuItem>
+                            <MenuItem value="city">City</MenuItem>
+                            <MenuItem value="zip">ZIP / Postal</MenuItem>
+                          </TextField>
 
-    {/* 2. Search Input */}
-    <TextField
-      fullWidth
-      size="small"
-      placeholder="Search country, region, city or postal code"
-      value={metaLocationQuery}
-      onChange={(event) => setMetaLocationQuery(event.target.value)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          void searchMetaLocationOptions();
-        }
-      }}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <IconButton
-              size="small"
-              onClick={searchMetaLocationOptions}
-              disabled={metaLocationLoading}
-              edge="end"
-            >
-              {metaLocationLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <SearchIcon />
-              )}
-            </IconButton>
-          </InputAdornment>
-        ),
-      }}
-    />
-  </Stack>
+                          {/* 2. Search Input */}
+                          <TextField
+                            fullWidth
+                            size="small"
+                            placeholder="Search country, region, city or postal code"
+                            value={metaLocationQuery}
+                            onChange={(event) => setMetaLocationQuery(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                void searchMetaLocationOptions();
+                              }
+                            }}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    size="small"
+                                    onClick={searchMetaLocationOptions}
+                                    disabled={metaLocationLoading}
+                                    edge="end"
+                                  >
+                                    {metaLocationLoading ? (
+                                      <CircularProgress size={20} />
+                                    ) : (
+                                      <SearchIcon />
+                                    )}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Stack>
 
-  {/* Error Message */}
-  {metaLocationError && (
-    <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>
-      {metaLocationError}
-    </Typography>
-  )}
+                        {/* Error Message */}
+                        {metaLocationError && (
+                          <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>
+                            {metaLocationError}
+                          </Typography>
+                        )}
 
-  {/* 3. Search Results & Selection */}
-  {metaLocationOptions.length > 0 && (
-    <Box
-      sx={{
-        mt: 2,
-        p: 2,
-        bgcolor: "action.hover",
-        borderRadius: 2,
-        border: 1,
-        borderColor: "divider",
-      }}
-    >
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="flex-start">
-        <Autocomplete
-          multiple
-          size="small"
-          fullWidth
-          options={metaLocationOptions}
-          value={metaSelectedLocationOptions}
-          getOptionLabel={getMetaLookupLabel}
-          isOptionEqualToValue={(option, value) =>
-            getMetaLookupId(option) === getMetaLookupId(value)
-          }
-          onChange={(_, values) => setMetaSelectedLocationOptions(values)}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder="Select matching locations..."
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "background.paper",
-                  borderRadius: 2,
-                },
-              }}
-            />
-          )}
-        />
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={addSelectedMetaLocations}
-          disabled={!metaSelectedLocationOptions.length || metaLocationLoading}
-          sx={{
-            textTransform: "none",
-            borderRadius: 2,
-            whiteSpace: "nowrap",
-            height: 40, // Matches standard small TextField height
-            minWidth: 130,
-          }}
-        >
-          {metaLocationTargetMode === "EXCLUDE" ? "Add Exclusions" : "Add Included"}
-        </Button>
-      </Stack>
-    </Box>
-  )}
-</Box>
+                        {/* 3. Search Results & Selection */}
+                        {metaLocationOptions.length > 0 && (
+                          <Box
+                            sx={{
+                              mt: 2,
+                              p: 2,
+                              bgcolor: "action.hover",
+                              borderRadius: 2,
+                              border: 1,
+                              borderColor: "divider",
+                            }}
+                          >
+                            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="flex-start">
+                              <Autocomplete
+                                multiple
+                                size="small"
+                                fullWidth
+                                options={metaLocationOptions}
+                                value={metaSelectedLocationOptions}
+                                getOptionLabel={getMetaLookupLabel}
+                                isOptionEqualToValue={(option, value) =>
+                                  getMetaLookupId(option) === getMetaLookupId(value)
+                                }
+                                onChange={(_, values) => setMetaSelectedLocationOptions(values)}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    placeholder="Select matching locations..."
+                                    sx={{
+                                      "& .MuiOutlinedInput-root": {
+                                        backgroundColor: "background.paper",
+                                        borderRadius: 2,
+                                      },
+                                    }}
+                                  />
+                                )}
+                              />
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<AddIcon />}
+                                onClick={addSelectedMetaLocations}
+                                disabled={!metaSelectedLocationOptions.length || metaLocationLoading}
+                                sx={{
+                                  textTransform: "none",
+                                  borderRadius: 2,
+                                  whiteSpace: "nowrap",
+                                  height: 40, // Matches standard small TextField height
+                                  minWidth: 130,
+                                }}
+                              >
+                                {metaLocationTargetMode === "EXCLUDE" ? "Add Exclusions" : "Add Included"}
+                              </Button>
+                            </Stack>
+                          </Box>
+                        )}
+                      </Box>
                     </div>
                     <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/40 p-3">
                       <p className="text-sm font-semibold text-slate-800">Included locations *</p>
@@ -15323,126 +15337,125 @@ googleMerchantCenterProducts.length > 0 ? (
                     />
                   </div>
 
-        {["SEARCH", "DISPLAY", "SHOPPING"].includes(googleCampaignType) && (
-  <Box sx={{ gridColumn: "1 / -1", width: "100%" }}>
-    <Typography
-      variant="subtitle2"
-      fontWeight={600}
-      sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}
-    >
-      Audience User Lists
-      <Typography component="span" variant="caption" color="text.secondary" fontWeight={400}>
-        (Optional)
-      </Typography>
-    </Typography>
+                  {["SEARCH", "DISPLAY", "SHOPPING"].includes(googleCampaignType) && (
+                    <Box sx={{ gridColumn: "1 / -1", width: "100%" }}>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={600}
+                        sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        Audience User Lists
+                        <Typography component="span" variant="caption" color="text.secondary" fontWeight={400}>
+                          (Optional)
+                        </Typography>
+                      </Typography>
 
-    <Autocomplete
-      multiple
-      openOnFocus
-      disableCloseOnSelect
-      options={googleUserListOptions}
-      loading={googleUserListLoading}
-      // Parse the string state into selected option objects for the Autocomplete
-      value={googleUserListOptions.filter((option) => {
-        const resourceName = getGoogleLookupResourceName(option);
-        const selectedResources = googleAdGroupUserLists
-          .split(/[\n,]+/)
-          .map((v) => v.trim())
-          .filter(Boolean);
-        return !!resourceName && selectedResources.includes(resourceName);
-      })}
-      // Convert the selected options back into the newline-separated string
-      onChange={(_, selectedOptions) => {
-        const selectedResources = selectedOptions
-          .map((option) => getGoogleLookupResourceName(option))
-          .filter((resourceName): resourceName is string => Boolean(resourceName));
+                      <Autocomplete
+                        multiple
+                        openOnFocus
+                        disableCloseOnSelect
+                        options={googleUserListOptions}
+                        loading={googleUserListLoading}
+                        // Parse the string state into selected option objects for the Autocomplete
+                        value={googleUserListOptions.filter((option) => {
+                          const resourceName = getGoogleLookupResourceName(option);
+                          const selectedResources = googleAdGroupUserLists
+                            .split(/[\n,]+/)
+                            .map((v) => v.trim())
+                            .filter(Boolean);
+                          return !!resourceName && selectedResources.includes(resourceName);
+                        })}
+                        // Convert the selected options back into the newline-separated string
+                        onChange={(_, selectedOptions) => {
+                          const selectedResources = selectedOptions
+                            .map((option) => getGoogleLookupResourceName(option))
+                            .filter((resourceName): resourceName is string => Boolean(resourceName));
 
-        setGoogleAdGroupUserLists(selectedResources.join("\n"));
-        clearPreview();
-      }}
-      getOptionLabel={(option) => getGoogleLookupLabel(option) || "Unknown List"}
-      isOptionEqualToValue={(option, value) =>
-        getGoogleLookupResourceName(option) === getGoogleLookupResourceName(value)
-      }
-      noOptionsText="No accessible user lists found"
-      loadingText="Loading audience user lists..."
-      ListboxProps={{ style: { maxHeight: 240 } }}
-      renderOption={(props, option, { selected }) => {
-        const resourceName = getGoogleLookupResourceName(option);
-        return (
-          <Box
-            component="li"
-            {...props}
-            key={resourceName || getGoogleLookupLabel(option)}
-            sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}
-          >
-            <Checkbox size="small" checked={selected} sx={{ p: 0.5 }} />
-            <Box sx={{ minWidth: 0 }}>
-              <Typography variant="body2" fontWeight={500}>
-                {getGoogleLookupLabel(option)}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: "block", overflowWrap: "anywhere" }}
-              >
-                {resourceName}
-              </Typography>
-            </Box>
-          </Box>
-        );
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          size="small"
-          placeholder={
-            googleAdGroupUserLists.length > 0
-              ? "Search or add user lists"
-              : "Click to select audience user lists"
-          }
-          error={Boolean(googleUserListError)}
-          helperText={googleUserListError || undefined}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {googleUserListLoading && <CircularProgress color="inherit" size={18} />}
-                {params?.InputProps?.endAdornment}
-              </>
-            ),
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": { borderRadius: 2 },
-          }}
-        />
-      )}
-    />
+                          setGoogleAdGroupUserLists(selectedResources.join("\n"));
+                          clearPreview();
+                        }}
+                        getOptionLabel={(option) => getGoogleLookupLabel(option) || "Unknown List"}
+                        isOptionEqualToValue={(option, value) =>
+                          getGoogleLookupResourceName(option) === getGoogleLookupResourceName(value)
+                        }
+                        noOptionsText="No accessible user lists found"
+                        loadingText="Loading audience user lists..."
+                        ListboxProps={{ style: { maxHeight: 240 } }}
+                        renderOption={(props, option, { selected }) => {
+                          const resourceName = getGoogleLookupResourceName(option);
+                          return (
+                            <Box
+                              component="li"
+                              {...props}
+                              key={resourceName || getGoogleLookupLabel(option)}
+                              sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}
+                            >
+                              <Checkbox size="small" checked={selected} sx={{ p: 0.5 }} />
+                              <Box sx={{ minWidth: 0 }}>
+                                <Typography variant="body2" fontWeight={500}>
+                                  {getGoogleLookupLabel(option)}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ display: "block", overflowWrap: "anywhere" }}
+                                >
+                                  {resourceName}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          );
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            size="small"
+                            placeholder={
+                              googleAdGroupUserLists.length > 0
+                                ? "Search or add user lists"
+                                : "Click to select audience user lists"
+                            }
+                            error={Boolean(googleUserListError)}
+                            helperText={googleUserListError || undefined}
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {googleUserListLoading && <CircularProgress color="inherit" size={18} />}
+                                  {params?.InputProps?.endAdornment}
+                                </>
+                              ),
+                            }}
+                            sx={{
+                              "& .MuiOutlinedInput-root": { borderRadius: 2 },
+                            }}
+                          />
+                        )}
+                      />
 
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        mt: 1.5,
-        gap: 1,
-      }}
-    >
-      <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
-        Only lists returned by the account lookup can be selected here.
-      </Typography>
-      <Chip
-        size="small"
-        color="primary"
-        variant="outlined"
-        label={`${
-          googleAdGroupUserLists.split(/[\n,]+/).map((v) => v.trim()).filter(Boolean).length
-        } selected`}
-        sx={{ flexShrink: 0 }}
-      />
-    </Box>
-  </Box>
-)}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mt: 1.5,
+                          gap: 1,
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+                          Only lists returned by the account lookup can be selected here.
+                        </Typography>
+                        <Chip
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          label={`${googleAdGroupUserLists.split(/[\n,]+/).map((v) => v.trim()).filter(Boolean).length
+                            } selected`}
+                          sx={{ flexShrink: 0 }}
+                        />
+                      </Box>
+                    </Box>
+                  )}
                   {googleCampaignType === "DEMAND_GEN" && (
                     <div className="sm:col-span-2">
                       <label className={labelClass}>
@@ -18198,8 +18211,13 @@ googleMerchantCenterProducts.length > 0 ? (
                       <p className="mt-2 text-xs text-amber-700">Meta returned a large resource list. The displayed results are capped; refine access or catalog selection before using these resources.</p>
                     )}
                     {metaCatalogCreativeEnabled ? (
-                      <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-800">
-                        Dynamic Product Ad is enabled. Meta supplies product images, names, prices and item URLs from the selected Catalog and Product Set. AdSyntra will not upload a manually selected image or video for this creative. The initial workflow uses Sales → Website → Link Clicks, Automatic placements and a fixed Shop Now CTA.
+                      <div className="mt-3 space-y-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-800">
+                        <p>
+                          Dynamic Product Ad is enabled. Meta supplies product images, names, prices and item URLs from the selected Catalog and Product Set. AdSyntra will not upload a manually selected image or video for this creative. The initial workflow uses Sales → Website → Link Clicks, Automatic placements and a fixed Shop Now CTA.
+                        </p>
+                        <p className="font-semibold">
+                          Controlled live test: only this Meta-only Catalog workflow can use Live execution. Set META_CATALOG_LIVE_CREATION_ENABLED=true in the API environment and NEXT_PUBLIC_META_CATALOG_LIVE_CREATION_ENABLED=true in the frontend environment, then restart both servers. Successfully created Campaign, Ad Set, Creative and Ad resources are intended to start PAUSED.
+                        </p>
                       </div>
                     ) : (
                       <p className="mt-3 text-xs leading-5 text-slate-500">
@@ -18371,35 +18389,35 @@ googleMerchantCenterProducts.length > 0 ? (
                     </div>
                   ) : (
                     <div>
-                    <label className={labelClass}>Call to Action</label>
-                    <select
-                      value={metaCallToAction}
-                      onChange={(e) => {
-                        setMetaCallToAction(e.target.value);
-                        clearPreview();
-                      }}
-                      className={inputClass}
-                    >
-                      {metaDestinationType === "INSTANT_FORM" ? (
-                        <>
-                          <option value="APPLY_NOW">Apply Now</option>
-                          <option value="DOWNLOAD">Download</option>
-                          <option value="GET_QUOTE">Get Quote</option>
-                          <option value="LEARN_MORE">Learn More</option>
-                          <option value="SIGN_UP">Sign Up</option>
-                          <option value="SUBSCRIBE">Subscribe</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="LEARN_MORE">Learn More</option>
-                          <option value="SHOP_NOW">Shop Now</option>
-                          <option value="SIGN_UP">Sign Up</option>
-                          <option value="CONTACT_US">Contact Us</option>
-                          <option value="GET_QUOTE">Get Quote</option>
-                          <option value="DOWNLOAD">Download</option>
-                        </>
-                      )}
-                    </select>
+                      <label className={labelClass}>Call to Action</label>
+                      <select
+                        value={metaCallToAction}
+                        onChange={(e) => {
+                          setMetaCallToAction(e.target.value);
+                          clearPreview();
+                        }}
+                        className={inputClass}
+                      >
+                        {metaDestinationType === "INSTANT_FORM" ? (
+                          <>
+                            <option value="APPLY_NOW">Apply Now</option>
+                            <option value="DOWNLOAD">Download</option>
+                            <option value="GET_QUOTE">Get Quote</option>
+                            <option value="LEARN_MORE">Learn More</option>
+                            <option value="SIGN_UP">Sign Up</option>
+                            <option value="SUBSCRIBE">Subscribe</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="LEARN_MORE">Learn More</option>
+                            <option value="SHOP_NOW">Shop Now</option>
+                            <option value="SIGN_UP">Sign Up</option>
+                            <option value="CONTACT_US">Contact Us</option>
+                            <option value="GET_QUOTE">Get Quote</option>
+                            <option value="DOWNLOAD">Download</option>
+                          </>
+                        )}
+                      </select>
                     </div>
                   )}
                   {!metaCatalogCreativeEnabled && metaCreativeFormat === "SINGLE_IMAGE" && (
@@ -18681,13 +18699,13 @@ googleMerchantCenterProducts.length > 0 ? (
                         effectiveMetaOptimizationGoal !== "CONVERSATIONS" ||
                         effectiveMetaBillingEvent !== "IMPRESSIONS" ||
                         metaPlacementMode !== "AUTOMATIC") && (
-                        <p className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-                          Messaging requires Meta Engagement, Conversations,
-                          Impressions billing and Automatic placements. Update
-                          the corresponding campaign and Ad Set settings before
-                          continuing.
-                        </p>
-                      )}
+                          <p className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                            Messaging requires Meta Engagement, Conversations,
+                            Impressions billing and Automatic placements. Update
+                            the corresponding campaign and Ad Set settings before
+                            continuing.
+                          </p>
+                        )}
                     </>
                   )}
 
@@ -19347,16 +19365,16 @@ googleMerchantCenterProducts.length > 0 ? (
                   metaExcludedRegionKeys.trim() ||
                   metaExcludedCityKeys.trim() ||
                   metaExcludedZipKeys.trim()) && (
-                  <p>
-                    <strong>Excluded locations:</strong>{" "}
-                    {[
-                      metaExcludedCountries.trim(),
-                      metaExcludedRegionKeys.trim() ? "Selected regions" : "",
-                      metaExcludedCityKeys.trim() ? "Selected cities" : "",
-                      metaExcludedZipKeys.trim() ? "Selected ZIP codes" : "",
-                    ].filter(Boolean).join(" · ")}
-                  </p>
-                )}
+                    <p>
+                      <strong>Excluded locations:</strong>{" "}
+                      {[
+                        metaExcludedCountries.trim(),
+                        metaExcludedRegionKeys.trim() ? "Selected regions" : "",
+                        metaExcludedCityKeys.trim() ? "Selected cities" : "",
+                        metaExcludedZipKeys.trim() ? "Selected ZIP codes" : "",
+                      ].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                 <p>
                   <strong>Bid Strategy:</strong> {metaBidStrategy}
                 </p>
@@ -19523,15 +19541,17 @@ googleMerchantCenterProducts.length > 0 ? (
                   Preparing this preview does not submit the campaign request.
                   The Backend API Request Preview below contains the separate
                   payload submitted to POST /api/campaigns. Validate-only mode
-                  performs Google Ads validation and Meta local configuration
-                  validation without creating provider resources. Meta
-                  validation is not a remote Graph API dry run. Live execution
-                  sends real provider API mutations. Successfully created
-                  resources are intended to start PAUSED. A provider can
-                  partially succeed if a dependent resource fails. The current
-                  creation scope is Google Search campaigns and Meta
-                  single-image website campaigns. Settings not included in the
-                  backend request are not applied by this operation.
+                  creates no provider resources. For Meta Catalog Dynamic
+                  Product Ads, AdSyntra sends Meta's native Campaign
+                  validate_only request and locally validates the Ad Set,
+                  Creative and Ad configuration; other Meta workflows use
+                  local validation. Live execution sends real provider API
+                  mutations only for the explicitly enabled Meta Catalog test
+                  workflow (and any already-supported Google workflow).
+                  Successfully created resources are intended to start PAUSED.
+                  A provider can partially succeed if a dependent resource
+                  fails. Settings not included in the backend request are not
+                  applied by this operation.
                 </p>
               </div>
 

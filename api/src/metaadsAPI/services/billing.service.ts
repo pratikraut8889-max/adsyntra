@@ -1,101 +1,24 @@
 import type { BillingDateRange } from "../../googleadsAPI/services/billing.service.js";
 
 import { getProviderAccessToken } from "../../utils/provider-token.utils.js";
-
-export interface MetaBillingInvoice {
-
-  id: string;
-
-  invoiceNumber: string | null;
-
-  invoiceDate: string | null;
-
-  billingPeriod: string | null;
-
-  dueDate: string | null;
-
-  paymentStatus: string | null;
-
-  amountDue: number | null;
-
-  amount: number | null;
-
-  currency: string | null;
-
-  invoiceType: string | null;
-
-  downloadAvailable: boolean;
-
-  businessId: string;
-
-}
-
-export interface MetaSpendTrendPoint {
-  date: string;
-  amount: number;
-}
-
-export interface MetaBillingOverview {
-
-  availability: "available" | "not_supported" | "permission_required" | "error";
-
-  message: string | null;
-
-  currency: string | null;
-
-  accountStatus: { code: number | null; label: string };
-
-  paymentArrangement: "prepaid" | "postpay" | "unknown";
-
-  balance: number | null;
-
-  balanceLabel: string;
-
-  amountSpentLifetimeOrCap: number | null;
-
-  spendCap: number | null;
-
-  periodSpend: number | null;
-
-  periodSpendAvailability: "available" | "no_data" | "permission_required" | "error";
-  periodSpendMessage: string | null;
-  spendTrend: MetaSpendTrendPoint[];
-  spendTrendAvailability: "available" | "no_data" | "permission_required" | "error";
-  spendTrendMessage: string | null;
-
-  paymentMethod: {
-
-    availability: "available" | "permission_required" | "not_available";
-
-    displayString: string | null;
-
-    type: string | null;
-
-  };
-
-  tax: {
-
-    availability: "available" | "not_available";
-
-    taxId: string | null;
-
-    taxIdStatus: number | null;
-
-  };
-
-  business: { id: string; name: string | null } | null;
-
-  invoicesAvailability: "available" | "not_supported" | "permission_required" | "error";
-
-  invoicesMessage: string | null;
-
-  invoices: MetaBillingInvoice[];
-
-  lastSyncedAt: string;
-
-}
-
-type UnknownRecord = Record<string, unknown>;
+import type {
+  MetaBillingActivitiesResult,
+  MetaBillingActivity,
+  MetaBillingInvoice,
+  MetaBillingOverview,
+  MetaPeriodSpendResult,
+  MetaSpendTrendPoint,
+  MetaSpendTrendResult,
+  UnknownRecord,
+  GetMetaBillingOverviewInput,
+  GetMetaBillingActivitiesInput,
+  DownloadMetaBillingInvoiceInput,
+  DownloadMetaBillingInvoiceResult,
+} from "../interfaces/billing.service.js";
+import {
+  readMetaNumber,
+  readMetaString,
+} from "../utils/common.js";
 
 export class MetaBillingApiError extends Error {
 
@@ -130,23 +53,11 @@ function asRecord(value: unknown): UnknownRecord {
 }
 
 function stringValue(value: unknown): string | null {
-
-  if (typeof value !== "string" && typeof value !== "number") return null;
-
-  const result = String(value).trim();
-
-  return result || null;
-
+  return readMetaString(value);
 }
 
 function numberValue(value: unknown): number | null {
-
-  if (value === null || value === undefined || value === "") return null;
-
-  const parsed = typeof value === "number" ? value : Number(value);
-
-  return Number.isFinite(parsed) ? parsed : null;
-
+  return readMetaNumber(value);
 }
 
 function metaError(payload: unknown): UnknownRecord {
@@ -218,12 +129,6 @@ async function metaGet(
   return asRecord(payload);
 
 }
-
-type MetaPeriodSpendResult = {
-  amount: number | null;
-  availability: MetaBillingOverview["periodSpendAvailability"];
-  message: string | null;
-};
 
 function metaInsightsErrorText(error: unknown): string {
   if (error instanceof MetaBillingApiError) {
@@ -420,12 +325,6 @@ async function getMetaPeriodSpend(input: {
     };
   }
 }
-
-type MetaSpendTrendResult = {
-  points: MetaSpendTrendPoint[];
-  availability: MetaBillingOverview["periodSpendAvailability"];
-  message: string | null;
-};
 
 function dailyPointsFromMetaRows(rows: UnknownRecord[]): MetaSpendTrendPoint[] | null {
   const totals = new Map<string, number>();
@@ -699,15 +598,7 @@ function invoiceMessageFromError(
 
 }
 
-export async function getMetaBillingOverview(input: {
-
-  userId: string;
-
-  accountId: string;
-
-  dates: BillingDateRange;
-
-}): Promise<MetaBillingOverview> {
+export async function getMetaBillingOverview(input: GetMetaBillingOverviewInput): Promise<MetaBillingOverview> {
 
   const accessToken = await getProviderAccessToken(input.userId, "metaAds");
 
@@ -979,26 +870,6 @@ export async function getMetaBillingOverview(input: {
 }
 
 
-export interface MetaBillingActivity {
-  id: string;
-  eventType: string;
-  title: string;
-  description: string;
-  eventTime: string | null;
-  accountTime: string | null;
-  actorName: string | null;
-  objectName: string | null;
-  objectType: string | null;
-}
-
-export interface MetaBillingActivitiesResult {
-  availability: "available" | "not_supported" | "permission_required" | "error";
-  message: string | null;
-  activities: MetaBillingActivity[];
-  truncated: boolean;
-  lastSyncedAt: string;
-}
-
 const BILLING_ACTIVITY_TITLES: Record<string, { title: string; description: string }> = {
   ad_account_billing_charge: {
     title: "Billing charge recorded",
@@ -1118,11 +989,7 @@ function activityErrorAvailability(error: unknown): MetaBillingActivitiesResult[
  * Activity edge is read-only and its availability depends on the token's
  * account permissions. It is not a complete payments ledger.
  */
-export async function getMetaBillingActivities(input: {
-  userId: string;
-  accountId: string;
-  dates: BillingDateRange;
-}): Promise<MetaBillingActivitiesResult> {
+export async function getMetaBillingActivities(input: GetMetaBillingActivitiesInput): Promise<MetaBillingActivitiesResult> {
   const lastSyncedAt = new Date().toISOString();
   try {
     const accessToken = await getProviderAccessToken(input.userId, "metaAds");
@@ -1237,17 +1104,9 @@ function safeMetaDownloadUrl(rawUrl: string): URL {
 
 }
 
-export async function downloadMetaBillingInvoice(input: {
-
-  userId: string;
-
-  accountId: string;
-
-  businessId: string;
-
-  invoiceId: string;
-
-}): Promise<{ bytes: Uint8Array; filename: string; contentType: string }> {
+export async function downloadMetaBillingInvoice(
+  input: DownloadMetaBillingInvoiceInput,
+): Promise<DownloadMetaBillingInvoiceResult> {
 
   if (!/^\d+$/.test(input.businessId) || !/^\d+$/.test(input.invoiceId)) {
 
